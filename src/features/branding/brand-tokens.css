@@ -1,0 +1,28 @@
+/* Gerado por npm run branding:sync. */
+:root {
+  --brand-background: #F5F6F0;
+  --brand-text: #18251F;
+  --brand-muted: #5C6B62;
+  --brand-surface: #FFFFFF;
+  --brand-line: #DCE3DA;
+  --brand-control: #7A8A80;
+  --brand-ink: #14251E;
+  --brand-primary: #176B48;
+  --brand-primary-hover: #105337;
+  --brand-accent: #D1F878;
+  --brand-on-accent: #18251F;
+  --brand-on-primary: #FFFFFF;
+  --brand-soft: #E7F4EC;
+  --brand-inverse-text: #F5F6F0;
+  --brand-inverse-muted: #B6C4B8;
+  --brand-success-text: #206B46;
+  --brand-success-background: #E7F4EC;
+  --brand-warning-text: #855400;
+  --brand-warning-background: #FFF2CF;
+  --brand-danger-text: #B42318;
+  --brand-danger-background: #FFF0ED;
+  --brand-info-text: #245BCA;
+  --brand-info-background: #EDF3FF;
+  --brand-neutral-text: #5C6B62;
+  --brand-neutral-background: #EEF1EB;
+}

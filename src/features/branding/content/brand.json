@@ -1,0 +1,531 @@
+{
+  "metadata": {
+    "project": "WMS SaaS",
+    "version": "1.3",
+    "date": "2026-10-16",
+    "concept": "Precisão em movimento",
+    "tagline": "Cada movimento, sob controle.",
+    "descriptor": "Gestão de armazéns"
+  },
+  "color": {
+    "brand": {
+      "ink": "#14251E",
+      "primary": "#176B48",
+      "primaryHover": "#105337",
+      "onPrimary": "#FFFFFF",
+      "accent": "#D1F878",
+      "onAccent": "#18251F",
+      "soft": "#E7F4EC"
+    },
+    "background": "#F5F6F0",
+    "surface": "#FFFFFF",
+    "surfaceMuted": "#EEF1EB",
+    "text": {
+      "primary": "#18251F",
+      "secondary": "#5C6B62",
+      "inverse": "#F5F6F0",
+      "inverseSecondary": "#B6C4B8"
+    },
+    "border": {
+      "subtle": "#DCE3DA",
+      "control": "#7A8A80"
+    },
+    "focus": {
+      "onLight": "#176B48",
+      "onDark": "#D1F878"
+    },
+    "semantic": {
+      "success": {
+        "foreground": "#206B46",
+        "background": "#E7F4EC"
+      },
+      "warning": {
+        "foreground": "#855400",
+        "background": "#FFF2CF"
+      },
+      "danger": {
+        "foreground": "#B42318",
+        "background": "#FFF0ED"
+      },
+      "info": {
+        "foreground": "#245BCA",
+        "background": "#EDF3FF"
+      },
+      "neutral": {
+        "foreground": "#5C6B62",
+        "background": "#EEF1EB"
+      }
+    }
+  },
+  "typography": {
+    "family": {
+      "sans": "Manrope",
+      "sansFallback": "Arial, Helvetica, sans-serif",
+      "mono": "DM Mono",
+      "monoFallback": "Consolas, monospace"
+    },
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "display": 800
+    },
+    "monoWeights": [
+      400,
+      500
+    ],
+    "web": {
+      "display": {
+        "fontSizeMin": 56,
+        "fontSizeMax": 72,
+        "lineHeight": 1.05,
+        "fontWeight": 700
+      },
+      "screenTitle": {
+        "fontSize": 32,
+        "lineHeight": 1.2,
+        "fontWeight": 700
+      },
+      "sectionTitle": {
+        "fontSize": 22,
+        "lineHeight": 1.3,
+        "fontWeight": 700
+      },
+      "body": {
+        "fontSize": 16,
+        "lineHeight": 1.55,
+        "fontWeight": 400
+      },
+      "denseData": {
+        "fontSize": 14,
+        "lineHeight": 1.5,
+        "fontWeight": 500
+      },
+      "label": {
+        "fontSize": 14,
+        "lineHeight": 1.4,
+        "fontWeight": 600
+      },
+      "button": {
+        "fontSize": 14,
+        "lineHeight": 1.4,
+        "fontWeight": 700
+      },
+      "caption": {
+        "fontSize": 13,
+        "lineHeight": 1.5,
+        "fontWeight": 400
+      },
+      "code": {
+        "fontSize": 14,
+        "lineHeight": 1.5,
+        "fontWeight": 400
+      }
+    },
+    "mobile": {
+      "display": {
+        "fontSizeMin": 32,
+        "fontSizeMax": 40,
+        "lineHeight": 1.1,
+        "fontWeight": 700
+      },
+      "screenTitle": {
+        "fontSize": 28,
+        "lineHeight": 1.2,
+        "fontWeight": 700
+      },
+      "sectionTitle": {
+        "fontSize": 22,
+        "lineHeight": 1.3,
+        "fontWeight": 700
+      },
+      "body": {
+        "fontSize": 16,
+        "lineHeight": 1.5,
+        "fontWeight": 400
+      },
+      "label": {
+        "fontSize": 16,
+        "lineHeight": 1.4,
+        "fontWeight": 600
+      },
+      "button": {
+        "fontSize": 16,
+        "lineHeight": 1.4,
+        "fontWeight": 700
+      },
+      "caption": {
+        "fontSize": 14,
+        "lineHeight": 1.45,
+        "fontWeight": 400
+      },
+      "code": {
+        "fontSize": 14,
+        "lineHeight": 1.5,
+        "fontWeight": 400
+      }
+    },
+    "numeric": {
+      "tabularFigures": true,
+      "tableAlignment": "right",
+      "locale": "pt-BR"
+    }
+  },
+  "spacing": {
+    "base": 4,
+    "scale": [
+      4,
+      8,
+      12,
+      16,
+      20,
+      24,
+      32,
+      40,
+      48,
+      64,
+      80,
+      96
+    ]
+  },
+  "radius": {
+    "control": 8,
+    "card": 12,
+    "feature": 24,
+    "pill": 999
+  },
+  "interaction": {
+    "webTargetMin": 44,
+    "mobileTargetMin": 48,
+    "focusWidth": 3,
+    "focusOffset": 3,
+    "transitionMs": {
+      "fast": 120,
+      "normal": 180
+    },
+    "respectReducedMotion": true
+  },
+  "author": {
+    "name": "Gabriel Lourenço",
+    "signature": "Monograma GL",
+    "number": "01",
+    "portfolio": "https://lourencogabriel.dev/",
+    "source": {
+      "url": "https://lourencogabriel.dev/downloads/assinaturas-gabriel.zip",
+      "sha256": "f72616234073267549655055123c16d1a6566d8e0f9553346703cc4937539e3b",
+      "catalogueCount": 9,
+      "originalFilesCount": 146
+    },
+    "files": [
+      {
+        "path": "selecionada/signatures/01-monograma-gl-pt-light-mono.svg",
+        "original": "assinaturas-gabriel/signatures/01-monograma-gl-pt-light-mono.svg",
+        "bytes": 761,
+        "sha256": "6ac2af56aa628d0e6de087414d11aceb176decf77975c17bf34c96fcf98e5df4"
+      },
+      {
+        "path": "selecionada/signatures/01-monograma-gl-pt-dark-mono.svg",
+        "original": "assinaturas-gabriel/signatures/01-monograma-gl-pt-dark-mono.svg",
+        "bytes": 761,
+        "sha256": "b7ff61df94dcdb73aebaf1df1c89ed00fd072663184f477961460ff126feb58b"
+      },
+      {
+        "path": "selecionada/icons/01-monograma-gl-light-mono.svg",
+        "original": "assinaturas-gabriel/icons/01-monograma-gl-light-mono.svg",
+        "bytes": 433,
+        "sha256": "f1eb67bcec53cef8714262fcc949d6af28dc76741a4ebb64fee2cf5d62691e33"
+      },
+      {
+        "path": "selecionada/icons/01-monograma-gl-dark-mono.svg",
+        "original": "assinaturas-gabriel/icons/01-monograma-gl-dark-mono.svg",
+        "bytes": 433,
+        "sha256": "f3e549bc2659d79a68d5d609c13e5b3308d4fac864b1a50dd8030280e986561d"
+      },
+      {
+        "path": "selecionada/png/01-monograma-gl-light-mono.png",
+        "original": "assinaturas-gabriel/png/01-monograma-gl-light-mono.png",
+        "bytes": 5618,
+        "sha256": "46ef269c1e9028327dedec8c8055f12d6050570872a05ce3687b2d39e62639f2"
+      },
+      {
+        "path": "selecionada/png/01-monograma-gl-dark-mono.png",
+        "original": "assinaturas-gabriel/png/01-monograma-gl-dark-mono.png",
+        "bytes": 5448,
+        "sha256": "2af7d883faa3177a6f7bd680f091eb4bb7994a74ff54fa3cd311f79516c08ef2"
+      }
+    ]
+  },
+  "files": [
+    {
+      "url": "/branding/fonts/Manrope-Variable.ttf",
+      "path": "public/branding/fonts/Manrope-Variable.ttf",
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+      "bytes": 164700
+    },
+    {
+      "url": "/branding/fonts/DMMono-Regular.ttf",
+      "path": "public/branding/fonts/DMMono-Regular.ttf",
+      "sha256": "55b4c98f123daebb3ed27947ba47b2af00554fc6284d639a540bcef5e6258ad2",
+      "bytes": 49744
+    },
+    {
+      "url": "/branding/fonts/DMMono-Medium.ttf",
+      "path": "public/branding/fonts/DMMono-Medium.ttf",
+      "sha256": "fd327daf461db87b44a87def475d251bf03b997f7c07d9680592d75dbbfaad0b",
+      "bytes": 50360
+    },
+    {
+      "url": "/branding/fonts/Manrope-OFL.txt",
+      "path": "public/branding/fonts/Manrope-OFL.txt",
+      "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+      "bytes": 4387
+    },
+    {
+      "url": "/branding/fonts/DMMono-OFL.txt",
+      "path": "public/branding/fonts/DMMono-OFL.txt",
+      "sha256": "2bada5ea45c3c63b7f1ea1f88ce9672c9e4f0c42b2c3b7378949084fe55a3066",
+      "bytes": 4484
+    },
+    {
+      "url": "/branding/symbols/android-background.svg",
+      "path": "public/branding/symbols/android-background.svg",
+      "sha256": "1d4c662cd59caee04b238fd36003676d65c9c5993d3ef89f96ec45c1b33c62db",
+      "bytes": 235
+    },
+    {
+      "url": "/branding/symbols/android-composite.svg",
+      "path": "public/branding/symbols/android-composite.svg",
+      "sha256": "648581a8edfdf66fa62b978fd16cb2baf8865e935ab13035f4b354b6c723d0aa",
+      "bytes": 394
+    },
+    {
+      "url": "/branding/symbols/android-foreground.svg",
+      "path": "public/branding/symbols/android-foreground.svg",
+      "sha256": "21716ce20fc37978a316f0136010b62512f65f96888555a33d33e6cc6d9a5152",
+      "bytes": 347
+    },
+    {
+      "url": "/branding/symbols/android-monochrome.svg",
+      "path": "public/branding/symbols/android-monochrome.svg",
+      "sha256": "b71de641945aa979e87efacb84c9bfb4903440994526dd27f60f593e64794d48",
+      "bytes": 347
+    },
+    {
+      "url": "/branding/symbols/android-themed-preview.svg",
+      "path": "public/branding/symbols/android-themed-preview.svg",
+      "sha256": "d796819ed7dc064885b2b643424fb67f570631baf48c271e902dc64db3464975",
+      "bytes": 347
+    },
+    {
+      "url": "/branding/symbols/app-icon.svg",
+      "path": "public/branding/symbols/app-icon.svg",
+      "sha256": "bda01277fc49c3e334f5e44362550db840aa9e4a0570b133063a2f3d775a8bf9",
+      "bytes": 341
+    },
+    {
+      "url": "/branding/symbols/favicon.svg",
+      "path": "public/branding/symbols/favicon.svg",
+      "sha256": "fb8bb76bfb9febcf813d4c5dbee3fbb325b3b49348191b1123ea61c4721ebc86",
+      "bytes": 349
+    },
+    {
+      "url": "/branding/symbols/maskable.svg",
+      "path": "public/branding/symbols/maskable.svg",
+      "sha256": "0b5e54c2838faa0f6b93b0d2a43417b3122fdbf60a40f690c305a155f5623524",
+      "bytes": 395
+    },
+    {
+      "url": "/branding/symbols/symbol-dark.svg",
+      "path": "public/branding/symbols/symbol-dark.svg",
+      "sha256": "be416c8d7ab9150af873f709a7871f146bf4ceeaad8c2e9bc1179e16324be53c",
+      "bytes": 294
+    },
+    {
+      "url": "/branding/symbols/symbol-green.svg",
+      "path": "public/branding/symbols/symbol-green.svg",
+      "sha256": "620798bc37581460ad5e36fc384b9afc687429c76b56b23db10fdafdf3813102",
+      "bytes": 294
+    },
+    {
+      "url": "/branding/symbols/symbol-lime.svg",
+      "path": "public/branding/symbols/symbol-lime.svg",
+      "sha256": "9e807158d3f5eacebabb51d9b900ef67fe89efa72ab2d80e1f714f6a10fe7f41",
+      "bytes": 294
+    },
+    {
+      "url": "/branding/symbols/symbol-white.svg",
+      "path": "public/branding/symbols/symbol-white.svg",
+      "sha256": "e5f7297e49be38083e29745ca7e2ec1c60edf6e41f4ab01718dfd13e24d33f66",
+      "bytes": 294
+    },
+    {
+      "url": "/branding/icons/favicon-16.png",
+      "path": "public/branding/icons/favicon-16.png",
+      "sha256": "182c641950c97a764c2639ab74b0f194d2baea6699b7ddf6ec2a897436d1452f",
+      "bytes": 485
+    },
+    {
+      "url": "/branding/icons/favicon-32.png",
+      "path": "public/branding/icons/favicon-32.png",
+      "sha256": "000706b93c34a60f720751ba1d04501faccce7f2dcbba0cdcaae4ea0b85f79e8",
+      "bytes": 770
+    },
+    {
+      "url": "/branding/icons/favicon-48.png",
+      "path": "public/branding/icons/favicon-48.png",
+      "sha256": "bc986a9b825f1bb0e8dfac00074aa360558e82c63d3e30b6be45426d5ad2c132",
+      "bytes": 1211
+    },
+    {
+      "url": "/branding/icons/apple-touch-icon.png",
+      "path": "public/branding/icons/apple-touch-icon.png",
+      "sha256": "23f7c4887c64a3bfac643613c63b392f5584a749bab0d8c8a01139b7de227f5b",
+      "bytes": 2865
+    },
+    {
+      "url": "/branding/icons/icon-192.png",
+      "path": "public/branding/icons/icon-192.png",
+      "sha256": "c9e2361d084f7d11cf2002babbe55eead15fbc03d4ae42e92a12c35182c51901",
+      "bytes": 2558
+    },
+    {
+      "url": "/branding/icons/icon-512.png",
+      "path": "public/branding/icons/icon-512.png",
+      "sha256": "2d5f575c800ebeb4773160e023ec348e309c61f7a8f0b8238eaada15fdf9de83",
+      "bytes": 6844
+    },
+    {
+      "url": "/branding/icons/icon-maskable-192.png",
+      "path": "public/branding/icons/icon-maskable-192.png",
+      "sha256": "84b65b8922bcf996d57064ec14d9348dfe46dddaf67c420a69ba3572c0545191",
+      "bytes": 2950
+    },
+    {
+      "url": "/branding/icons/icon-maskable-512.png",
+      "path": "public/branding/icons/icon-maskable-512.png",
+      "sha256": "f7e99ea6fce5cbd02f135527d799abb027df2d4f9f19b4270f99d7fba924ca46",
+      "bytes": 7502
+    },
+    {
+      "url": "/branding/icons/favicon.ico",
+      "path": "public/branding/icons/favicon.ico",
+      "sha256": "5b4690b141f4724808c9a51922fed27a006b5fba6ac6c93b0f29d3580c6a84b0",
+      "bytes": 2520
+    },
+    {
+      "url": "/branding/icons/icons-manifest.json",
+      "path": "public/branding/icons/icons-manifest.json",
+      "sha256": "fff9b74c8e02a08f53de7bfb9e7ba0d01d8a29e2aa6510c46974dc20a88dc565",
+      "bytes": 520
+    },
+    {
+      "url": "/branding/icons/app-icon-1024.png",
+      "path": "public/branding/icons/app-icon-1024.png",
+      "sha256": "50041433efe24af5be5985537a004929610280003008f407e60e2bad72bc89fb",
+      "bytes": 19292
+    },
+    {
+      "url": null,
+      "path": "src/app/favicon.ico",
+      "sha256": "5b4690b141f4724808c9a51922fed27a006b5fba6ac6c93b0f29d3580c6a84b0",
+      "bytes": 2520
+    },
+    {
+      "url": null,
+      "path": "src/app/icon.svg",
+      "sha256": "fb8bb76bfb9febcf813d4c5dbee3fbb325b3b49348191b1123ea61c4721ebc86",
+      "bytes": 349
+    },
+    {
+      "url": null,
+      "path": "src/app/apple-icon.png",
+      "sha256": "23f7c4887c64a3bfac643613c63b392f5584a749bab0d8c8a01139b7de227f5b",
+      "bytes": 2865
+    },
+    {
+      "url": "/branding/author/signatures/01-monograma-gl-pt-light-mono.svg",
+      "path": "public/branding/author/signatures/01-monograma-gl-pt-light-mono.svg",
+      "sha256": "6ac2af56aa628d0e6de087414d11aceb176decf77975c17bf34c96fcf98e5df4",
+      "bytes": 761
+    },
+    {
+      "url": "/branding/author/signatures/01-monograma-gl-pt-dark-mono.svg",
+      "path": "public/branding/author/signatures/01-monograma-gl-pt-dark-mono.svg",
+      "sha256": "b7ff61df94dcdb73aebaf1df1c89ed00fd072663184f477961460ff126feb58b",
+      "bytes": 761
+    },
+    {
+      "url": "/branding/author/icons/01-monograma-gl-light-mono.svg",
+      "path": "public/branding/author/icons/01-monograma-gl-light-mono.svg",
+      "sha256": "f1eb67bcec53cef8714262fcc949d6af28dc76741a4ebb64fee2cf5d62691e33",
+      "bytes": 433
+    },
+    {
+      "url": "/branding/author/icons/01-monograma-gl-dark-mono.svg",
+      "path": "public/branding/author/icons/01-monograma-gl-dark-mono.svg",
+      "sha256": "f3e549bc2659d79a68d5d609c13e5b3308d4fac864b1a50dd8030280e986561d",
+      "bytes": 433
+    },
+    {
+      "url": "/branding/author/png/01-monograma-gl-light-mono.png",
+      "path": "public/branding/author/png/01-monograma-gl-light-mono.png",
+      "sha256": "46ef269c1e9028327dedec8c8055f12d6050570872a05ce3687b2d39e62639f2",
+      "bytes": 5618
+    },
+    {
+      "url": "/branding/author/png/01-monograma-gl-dark-mono.png",
+      "path": "public/branding/author/png/01-monograma-gl-dark-mono.png",
+      "sha256": "2af7d883faa3177a6f7bd680f091eb4bb7994a74ff54fa3cd311f79516c08ef2",
+      "bytes": 5448
+    },
+    {
+      "url": "/branding/downloads/wms-icon-assets.zip",
+      "path": "public/branding/downloads/wms-icon-assets.zip",
+      "sha256": "c7a511ecd997cab5e4c67c3fc08b03db772ccdfd927bc5c725ff7e435039ffc3",
+      "bytes": 156785
+    },
+    {
+      "url": "/branding/downloads/author-signature.zip",
+      "path": "public/branding/downloads/author-signature.zip",
+      "sha256": "ffe28b7769b195e04b5181f58f052dc6a166a6510f1ff2685cfd57b679becc87",
+      "bytes": 15882
+    },
+    {
+      "url": "/branding/downloads/guia-de-marca.md",
+      "path": "public/branding/downloads/guia-de-marca.md",
+      "sha256": "065f0d934d766bf3f900e0104e73083c1a052b8ae311d7dc12892aa6471ad9df",
+      "bytes": 21873
+    },
+    {
+      "url": "/branding/downloads/guia-do-icone.md",
+      "path": "public/branding/downloads/guia-do-icone.md",
+      "sha256": "348e996c3e6cb6bb0f7f580a2edf6c494bf0d9babc7d6dead5031473196a3e63",
+      "bytes": 9332
+    },
+    {
+      "url": "/branding/downloads/guia-da-assinatura.md",
+      "path": "public/branding/downloads/guia-da-assinatura.md",
+      "sha256": "5d639b0eefa2ee44b5fd7e472bb9f636934a3ac1bdd8b1ebe6d23818294d47cb",
+      "bytes": 6941
+    },
+    {
+      "url": "/branding/downloads/guia-aplicacao-web.md",
+      "path": "public/branding/downloads/guia-aplicacao-web.md",
+      "sha256": "faee66972c7e6cd3c547bd027863c7f1ec67c6b3d3df4caa850c7677d691b5be",
+      "bytes": 4749
+    },
+    {
+      "url": "/branding/downloads/guia-aplicacao-mobile.md",
+      "path": "public/branding/downloads/guia-aplicacao-mobile.md",
+      "sha256": "11c0f147b51c8a9da44faadeb33cf6d4b2ee14dad918dcd9f3891f83577cc42e",
+      "bytes": 4195
+    },
+    {
+      "url": "/branding/downloads/guia-aplicacao-emails.md",
+      "path": "public/branding/downloads/guia-aplicacao-emails.md",
+      "sha256": "e0b3b849fdb54b7b905ba56305cf6e5c4f63e58b15f297568ff1de0d9b9b9df2",
+      "bytes": 4389
+    }
+  ]
+}

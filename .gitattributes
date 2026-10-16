@@ -1,0 +1,3 @@
+# Preservar os recursos originais da marca e as licenças de suas fontes.
+public/branding/** -text
+public/branding/fonts/*-OFL.txt whitespace=-blank-at-eol,cr-at-eol

@@ -5,6 +5,7 @@ import {ApiLookup} from '@/components/wms/ApiLookup';
 import {Notice,Panel,StatusPill} from '@/components/wms/primitives';
 import {ResourceTable} from '@/components/wms/ResourceTable';
 import {useAuth} from '@/features/auth/AuthProvider';
+import {BrandMark} from '@/features/branding/BrandMark';
 import {useApiQuery} from '@/lib/api/hooks';
 import {isPage,text} from '@/lib/api/types';
 import type {Entity,LookupOption,Page,Query} from '@/lib/api/types';
@@ -21,7 +22,7 @@ function QueueCard({queue,filters,revision}:{queue:typeof queues[number];filters
 export function DashboardHome(){
  const {can,user}=useAuth(),[warehouse,setWarehouse]=useState<LookupOption|null>(null),[revision,setRevision]=useState(0);
  const filters=warehouse?{warehouseId:warehouse.id}:{};
- return <div className="screen-stack"><div className="welcome-banner"><div><span className="eyebrow">WMS · Gestão</span><h2>Olá, {user?.name.split(' ')[0]}.</h2><p>Acompanhe as pendências e planeje os próximos passos da operação.</p></div><span className="welcome-mark" aria-hidden="true">W</span></div>
+ return <div className="screen-stack"><div className="welcome-banner"><div><span className="eyebrow">WMS · Gestão</span><h2>Olá, {user?.name.split(' ')[0]}.</h2><p>Acompanhe as pendências e planeje os próximos passos da operação.</p></div><span className="welcome-mark" aria-hidden="true"><BrandMark size={88} inverse /></span></div>
  <div className="dashboard-toolbar">{can('WAREHOUSE_VIEW')&&<ApiLookup resource="warehouses" label="Armazém" value={warehouse} onChange={setWarehouse} helperText="Sem seleção, a consulta reúne os armazéns permitidos pela API."/>}<button type="button" className="secondary-button" onClick={()=>setRevision(value=>value+1)}>Atualizar painel</button></div>
  <div className="metrics-grid">{queues.filter(queue=>can(queue.permission)).map(queue=><QueueCard key={queue.resource} queue={queue} filters={filters} revision={revision}/>)}</div>
  {!queues.some(queue=>can(queue.permission))&&<Notice>Seu perfil não tem acesso às filas operacionais. Consulte os módulos disponíveis no menu.</Notice>}

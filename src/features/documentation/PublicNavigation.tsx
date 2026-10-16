@@ -8,5 +8,6 @@ export function PublicNavigation() {
   return <nav className="public-navigation" aria-label="Documentação pública">
     <Link href="/documentacao/api" aria-current={pathname === '/documentacao/api' ? 'page' : undefined}>Documentação da API</Link>
     <Link href="/documentacao/modelo-relacional" aria-current={pathname === '/documentacao/modelo-relacional' ? 'page' : undefined}>Modelo relacional</Link>
+    <Link href="/documentacao/branding" aria-current={pathname === '/documentacao/branding' ? 'page' : undefined}>Branding</Link>
   </nav>;
 }

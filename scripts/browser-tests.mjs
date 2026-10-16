@@ -71,7 +71,7 @@ try{
  });
  await scenario('documentação pública abre sem renovar sessão e permite voltar ao painel autenticado',async()=>{
   await page.setViewportSize({width:1440,height:1000});await page.goto(base);await page.getByRole('heading',{name:'Visão geral',exact:true}).waitFor();await page.waitForLoadState('networkidle');const before=fixture.calls.length;
-  await page.getByRole('link',{name:'Documentação do projeto ↗',exact:true}).click();await page.getByRole('heading',{name:/Entenda como o.*WMS se conecta/}).waitFor();await page.waitForLoadState('networkidle');assert.equal(fixture.calls.length,before);
+  await page.getByRole('link',{name:'Documentação do projeto ↗',exact:true}).click();await page.getByRole('heading',{name:/Conheça o projeto.*Explore suas conexões/}).waitFor();await page.waitForLoadState('networkidle');assert.equal(fixture.calls.length,before);
   await page.getByRole('link',{name:'Entrar no painel',exact:false}).click();await page.waitForURL(base+'/');await page.getByRole('heading',{name:'Visão geral',exact:true}).waitFor();assert.equal(await page.locator('.account-link').innerText(),'Marina Gestora');
  });
  await scenario('logout revoga refresh, limpa painel e mantém recuperação de senha pública',async()=>{

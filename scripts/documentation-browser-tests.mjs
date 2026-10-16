@@ -30,7 +30,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (request.url().includes('/api/backend/')) apiRequests.push(request.url()); });
   await scenario('rotas públicas carregam sem sessão e com API indisponível', async () => {
-    for (const route of ['/documentacao', '/documentacao/api', '/documentacao/modelo-relacional']) {
+    for (const route of ['/documentacao', '/documentacao/api', '/documentacao/branding', '/documentacao/modelo-relacional']) {
       const response = await page.goto(base + route); assert.equal(response.status(), 200); await page.waitForLoadState('networkidle'); assert.equal(new URL(page.url()).pathname, route);
     }
     assert.equal(apiRequests.length, 0);
@@ -79,10 +79,45 @@ try {
     await page.getByRole('button', { name: 'Ajustar à largura' }).click(); assert.equal(await page.getByLabel('Nível de zoom').innerText(), '100%');
     await page.screenshot({ path: path.join(out, 'diagram-desktop.png') });
   });
-  await scenario('documentação e modelo acessíveis em 320 e 390 pixels', async () => {
+  await scenario('branding publica cores, fontes locais e exemplos de tipografia', async () => {
+    await page.goto(base + '/documentacao/branding');
+    await page.getByRole('heading', { name: 'Precisão em movimento.', exact: true }).waitFor();
+    await page.getByRole('button', { name: 'Copiar Lima, #D1F878', exact: true }).click();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), '#D1F878');
+    await page.getByRole('combobox', { name: 'Família', exact: true }).selectOption('mono');
+    await page.getByLabel('Experimente palavras e códigos', { exact: true }).fill('SKU-0042 · A-01-02');
+    const sampleFont = await page.locator('#branding-type-sample').evaluate(element => getComputedStyle(element).fontFamily);
+    const bodyFont = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
+    assert.notEqual(sampleFont, bodyFont);
+    for (const file of ['Manrope-Variable.ttf', 'DMMono-Regular.ttf', 'Manrope-OFL.txt', 'DMMono-OFL.txt']) {
+      const response = await fetch(base + '/branding/fonts/' + file); assert.equal(response.status, 200); assert((await response.arrayBuffer()).byteLength > 1000);
+    }
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+    await page.screenshot({ path: path.join(out, 'branding-desktop.png') });
+  });
+  await scenario('símbolo oferece variantes seguras, autoria e downloads públicos', async () => {
+    await page.getByRole('combobox', { name: 'Variante do símbolo' }).selectOption('tile');
+    await page.getByRole('combobox', { name: 'Recorte do ícone' }).selectOption('circle');
+    assert((await page.locator('.branding-preview-stage img').getAttribute('src')).endsWith('/maskable.svg'));
+    assert((await page.getByRole('link', { name: 'Baixar esta variante em SVG ↓' }).getAttribute('href')).endsWith('/maskable.svg'));
+    await page.getByRole('combobox', { name: 'Variante do símbolo' }).selectOption('green');
+    assert(await page.getByRole('combobox', { name: 'Recorte do ícone' }).isDisabled());
+    const credit = page.locator('.branding-author-example').getByRole('link', { name: 'Desenvolvido por Gabriel Lourenço — abrir portfólio' });
+    assert.equal(await credit.getAttribute('href'), 'https://lourencogabriel.dev/');
+    for (const file of ['wms-icon-assets.zip', 'author-signature.zip', 'guia-de-marca.md', 'guia-aplicacao-web.md', 'guia-aplicacao-mobile.md', 'guia-aplicacao-emails.md']) { const response = await fetch(base + '/branding/downloads/' + file); assert.equal(response.status, 200); assert((await response.arrayBuffer()).byteLength > 1000); }
+    const tokens = await (await fetch(base + '/branding/tokens.json')).json(); assert.equal(tokens.color.brand.accent, '#D1F878');
+    const favicon = new DataView(await (await fetch(base + '/favicon.ico')).arrayBuffer()); assert.equal(favicon.getUint16(4, true), 3);
+  });
+  await scenario('documentação, branding e modelo acessíveis em 320 e 390 pixels', async () => {
     for (const width of [390,320]) {
       await page.setViewportSize({ width, height: 844 });
-      for (const route of ['/documentacao', '/documentacao/api', '/documentacao/modelo-relacional']) { await page.goto(base + route); await page.waitForLoadState('networkidle'); assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${width}: ${route}`); }
+      for (const route of ['/documentacao', '/documentacao/api', '/documentacao/branding', '/documentacao/modelo-relacional']) {
+        await page.goto(base + route); await page.waitForLoadState('networkidle'); assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${width}: ${route}`);
+        if (route.endsWith('/branding')) {
+          assert.deepEqual(await page.locator('.branding-native-sizes img').evaluateAll(images => images.map(image => Math.round(image.getBoundingClientRect().width))), [16, 32, 48, 192]);
+          if (width === 390) await page.screenshot({ path: path.join(out, 'branding-mobile.png') });
+        }
+      }
       await page.locator('[data-table="estoque"]').click(); await page.getByRole('heading', { name: 'Saldos de estoque', exact: true }).waitFor(); assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
       const closeBounds = await page.getByRole('button', { name: 'Fechar detalhes da tabela' }).boundingBox(); const headerBounds = await page.locator('.public-header').boundingBox(); assert(closeBounds.y >= headerBounds.y + headerBounds.height, 'O cabeçalho não pode encobrir o botão de fechar detalhes.');
       if (width === 390) await page.screenshot({ path: path.join(out, 'model-mobile.png') });

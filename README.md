@@ -43,6 +43,7 @@ Os testes automatizados validam contratos e comportamentos do cliente. A homolog
 
 - [Integração da API e consumo por fluxo](docs/INTEGRACAO_API.md).
 - [Arquitetura do painel](docs/ARQUITETURA_PAINEL_WEB.md).
+- [Identidade visual e manutenção dos recursos](docs/IDENTIDADE_VISUAL.md).
 - [Contrato completo da API](../wms-saas-backend/docs/API_CLIENTS.md).
 
 ## Documentação pública
@@ -51,14 +52,17 @@ As páginas abaixo ficam disponíveis sem login e sem conexão com o backend:
 
 | Rota | Conteúdo |
 | --- | --- |
-| `/documentacao` | Entrada da documentação e links para as duas referências. |
+| `/documentacao` | Entrada da documentação: API, modelo relacional e branding. |
 | `/documentacao/api` | Referência completa da API: 158 endpoints, payloads/respostas, permissões e exemplos, com índice, pesquisa de endpoints e cópia de código. |
 | `/documentacao/api?guia=web` | Guia existente de consumo e comportamento do painel. |
 | `/documentacao/api?guia=mobile` | Guia existente de consumo e limites do aplicativo Flutter. |
 | `/documentacao/modelo-relacional` | Modelo interativo: áreas, pesquisa por tabela/campo, detalhes, PK/FK/UQ, referências e diagrama aprovado com zoom/rolagem. |
 | `/documentacao/modelo-relacional#tabela-estoque` | Exemplo de link direto para uma tabela, preservado ao recarregar. |
+| `/documentacao/branding` | Conceito, cores copiáveis, fontes, símbolo, variantes, tamanhos reais, autoria e downloads SVG/PNG/ICO e pacotes web/mobile. |
 
 O visual utiliza a paleta e os componentes do projeto. A entrada está disponível no login e no rodapé do painel. Essas páginas pertencem a um grupo de rotas sem `AuthProvider`; a restauração de sessão continua somente em `(application)`, mantendo os caminhos do painel e da autenticação.
+
+A identidade usa Manrope e DM Mono locais, floresta/verde/lima/papel, o símbolo W de percurso e o crédito de autoria com Monograma GL / 01. Favicon, touch icon, acesso, navegação, estados e componentes compartilhados seguem a mesma direção. Fontes e licenças acompanham o web; o navegador e o build não buscam fontes externas.
 
 Os textos publicados são snapshots do guia completo do backend e dos guias web/mobile. O explorador aproveita as descrições do HTML do modelo e lê os campos, tipos, chaves e referências do MWB aprovado. São 29 tabelas, 276 campos e 91 relacionamentos no desenho; a diferença em relação às 30 tabelas físicas do Flyway é explicada na página. O PNG publicado é uma cópia idêntica à figura aprovada.
 
@@ -70,6 +74,15 @@ npm run docs:sync -- --check
 ```
 
 O script lê somente os Markdown de referência e o HTML/MWB/PNG do modelo, gera JSON em `src/features/documentation/content/` e copia os downloads para `public/documentacao/`. Os originais de `docs-gerais/` permanecem locais. Os snapshots e os assets publicados pertencem ao web e são versionados para que um build isolado não dependa do diretório pai, de Python ou do backend em execução. A sincronização é explícita, não uma etapa de `npm run build`.
+
+Para atualizar a identidade a partir de `docs-gerais/identidade-visual/`:
+
+```bash
+npm run branding:sync
+npm run branding:sync -- --check
+```
+
+Essa sincronização copia os recursos selecionados, gera tokens CSS/JSON e verifica a geometria dos SVGs e os hashes da assinatura. O ZIP completo da coleção pessoal permanece local. Veja o [guia de manutenção](docs/IDENTIDADE_VISUAL.md). Alterações no guia de integração ainda usam `docs:sync`; nenhuma sincronização é executada automaticamente no build.
 
 Depois do deploy, os caminhos públicos podem ser referenciados no artigo com o domínio real. Nenhum domínio ou publicação foi presumido nesta entrega.
 
@@ -101,4 +114,4 @@ Configuração, build e comandos de pull/push estão em [docker/README.md](../do
 
 ## Resultado da validação
 
-Lint e TypeScript sem ocorrências; **77 testes automatizados**, **14 cenários do painel** e **7 cenários de documentação pública aprovados**; build de produção compilado. O navegador validou o servidor standalone: os 14 cenários do painel utilizaram uma API HTTP de teste; os sete de documentação utilizaram uma API indisponível para confirmar a independência de sessão e backend. A homologação com Spring, e-mail e dados reais permanece pendente. Veja os fluxos e limites em [docs/INTEGRACAO_API.md](docs/INTEGRACAO_API.md).
+Lint e TypeScript sem ocorrências; **77 testes automatizados**, **14 cenários do painel** e **9 cenários de documentação pública aprovados**; build de produção compilado. O navegador validou o servidor standalone: os 14 cenários do painel utilizaram uma API HTTP de teste; os nove de documentação utilizaram uma API indisponível para confirmar a independência de sessão e backend. A cobertura pública inclui o branding, com cópia de cores, laboratório de tipografia, variantes, autoria, downloads e amostras nativas em 320/390 px. A homologação com Spring, e-mail e dados reais permanece pendente. Veja os fluxos e limites em [docs/INTEGRACAO_API.md](docs/INTEGRACAO_API.md).

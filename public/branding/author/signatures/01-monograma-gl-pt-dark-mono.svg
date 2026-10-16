@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 56" width="260" height="56" color="#f2f2f0" fill="none" role="img" aria-labelledby="title">
+<title id="title">Desenvolvido por Gabriel Lourenço</title>
+<g transform="translate(0 4) scale(.75)"><path d="M32 18H22C14 18 9 23 9 32s5 14 13 14h14V30H22v6h8v5h-8c-4 0-7-3-7-9s3-9 7-9h10Z" fill="currentColor"/>
+<path d="M40 18h6v22h10v6H40Z" fill="currentColor"/><circle cx="54" cy="20" r="3.5" fill="currentColor"/></g>
+<text x="62" y="20" fill="#b2bac0" font-family="Arial, Helvetica, sans-serif" font-size="10.5" letter-spacing=".25">Desenvolvido por</text>
+<text x="62" y="40" fill="currentColor" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">Gabriel Lourenço</text>
+</svg>

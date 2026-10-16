@@ -18,7 +18,7 @@ src/
       auth/                        # Entrada e recuperação de senha
       gestao/[section]/page.tsx     # URLs dos módulos gerenciais
       page.tsx                     # Entrada do painel
-    (public)/documentacao/         # API e modelo, sem sessão ou chamadas ao backend
+    (public)/documentacao/         # API, modelo e branding, sem chamadas ao backend
     globals.css                    # Tema, componentes e adaptação de layout
     layout.tsx                     # Composição global do aplicativo
   components/wms/
@@ -27,6 +27,7 @@ src/
     ResourceTable.tsx              # Listas pesquisáveis e paginadas
     primitives.tsx                 # Modais, detalhes, avisos e estados
   features/
+    branding/                      # Símbolo, autoria, fontes, tokens e guia público
     documentation/                 # Markdown público, índices, catálogo e modelo interativo
     auth/                          # Sessão, MFA, identidade e permissões
     catalog/                       # Estrutura física, produtos e parceiros
@@ -94,3 +95,11 @@ Conferência física de entrada, putaway, picking, conferência e despacho de LP
 `npm run docs:sync` gera snapshots JSON e assets estáticos a partir da cópia completa do projeto. O build e o runtime utilizam apenas os arquivos versionados do submódulo web. Não há leitura do diretório pai no servidor nem busca remota dos documentos. Ao modificar fontes, sincronizar e revisar o diff; `npm run docs:sync -- --check` detecta snapshots desatualizados.
 
 A separação dos grupos `(application)` e `(public)` garante que ler documentação não inicialize refresh, carregue `/users/me` ou dependa de disponibilidade da API. A navegação para o painel restaura a sessão normalmente. Há testes de acesso público, âncoras, busca, downloads, vínculos, recarga, zoom, responsividade e regressão da sessão.
+
+## Marca e autoria
+
+`features/branding` concentra a geometria vetorial, a assinatura escolhida, fontes locais e papéis de cor. O layout raiz carrega Manrope/DM Mono com `next/font/local`; as variáveis antigas do tema apontam para os tokens gerados, mantendo os módulos existentes. `BrandMark` e `AuthorCredit` são usados nos shells e no guia público.
+
+`/documentacao/branding` apresenta a identidade e os recursos em componentes React. Cópia de cores, laboratório de fontes e recortes são interações locais. A assinatura completa preserva o SVG original; o crédito responsivo usa o monograma preservado e nome em texto real. As fontes, os ícones e os downloads pertencem ao próprio submódulo.
+
+`npm run branding:sync` prepara os snapshots de identidade a partir da pasta de criação local e verifica a geometria e a procedência dos recursos. A sincronização não faz parte do build ou do runtime. Consulte [IDENTIDADE_VISUAL.md](IDENTIDADE_VISUAL.md) para manutenção, fontes e regras de uso.
