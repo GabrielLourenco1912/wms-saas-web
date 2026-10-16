@@ -1,83 +1,83 @@
-# Arquitetura do Painel Web WMS
+# Arquitetura do painel web WMS
 
-## Objetivo
+## Responsabilidade do cliente
 
-Este projeto implementa apenas o painel web do gestor para apresentacao do TCC. A parte mobile do operador foi deixada fora de proposito, pois seus fluxos de execucao fisica ja pertencem a outro cliente.
+O painel Next.js atende o gestor de armazéns e distribuidores de pequeno e médio porte. Seu escopo reúne administração, planejamento, consulta e acompanhamento. O cliente mobile atende as conferências e execuções físicas com leitura de produto, LPN e posição.
 
-O painel web cobre as responsabilidades descritas no artigo para o gestor:
+As regras de estoque, FEFO, capacidade, rastreabilidade, bloqueio, concorrência e autorização são aplicadas pelo backend Java. A interface apresenta o resultado da API e valida o preenchimento dos formulários para orientar o usuário.
 
-- autenticacao simulada do gestor;
-- dashboard operacional;
-- gerenciamento da estrutura do armazem, zonas e posicoes;
-- catalogo de produtos e regras de rastreabilidade;
-- pre-recebimentos documentais, sem gerar saldo fisico;
-- pedidos de venda e geracao de ondas de separacao;
-- consulta de estoque, bloqueio e transferencia interna;
-- auditoria por livro razao;
-- usuarios, perfis e permissoes.
+O contrato de referência é [API_CLIENTS.md](../../wms-saas-backend/docs/API_CLIENTS.md), complementado pelo [guia deste cliente](INTEGRACAO_API.md). As permissões retornadas por `/api/users/me` determinam os recursos e as ações disponíveis.
 
-## Escolha de Arquitetura
-
-A arquitetura escolhida foi uma estrutura por feature, centralizada em `src/features/wms`.
+## Organização por domínio
 
 ```text
 src/
   app/
-    layout.tsx
-    page.tsx
-    globals.css
+    api/backend/[...path]/route.ts  # Proxy de mesma origem para a API Spring
+    auth/                          # Entrada e recuperação de senha
+    gestao/[section]/page.tsx       # URLs dos módulos gerenciais
+    globals.css                    # Tema, componentes e adaptação de layout
+    layout.tsx                     # Composição global do aplicativo
+    page.tsx                       # Entrada do painel
+  components/wms/
+    ApiLookup.tsx                  # Pesquisa de vínculos, cinco opções por página
+    EntityForm.tsx                 # Campos e submissão de cadastros
+    ResourceTable.tsx              # Listas pesquisáveis e paginadas
+    primitives.tsx                 # Modais, detalhes, avisos e estados
   features/
-    wms/
-      WmsDashboard.tsx
-      mock-data.ts
-      types.ts
+    auth/                          # Sessão, MFA, identidade e permissões
+    catalog/                       # Estrutura física, produtos e parceiros
+    dashboard/                     # Totais e filas retornados pela API
+    inventory/                     # Acompanhamento das contagens
+    planning/                      # Documentos, ondas e acompanhamento operacional
+    stock/                         # Saldos, bloqueios e transferências
+    users/                         # Contas, perfis e permissões
+    wms/                           # Composição e navegação do painel
+  lib/api/
+    client.ts                      # Transporte, renovação e comandos idempotentes
+    decimal.ts                     # Parsing e serialização numérica sem arredondar
+    hooks.ts                       # Consultas com cancelamento e isolamento de sessão
+    types.ts                       # Páginas, lookup e apresentação de valores
+tests/                             # Testes automatizados do cliente
 docs/
   ARQUITETURA_PAINEL_WEB.md
+  INTEGRACAO_API.md
 ```
 
-## Razao da Escolha
+Os componentes compartilhados tratam apresentação e transporte. Os módulos mantêm os formulários, os fluxos e os nomes do domínio. Novos recursos devem seguir essa separação: contrato da API, módulo responsável e componentes reutilizáveis quando houver comportamento comum.
 
-Para este momento do projeto, o objetivo principal e apresentar telas modernas e coerentes com o dominio WMS, sem API e sem persistencia real. Por isso, uma arquitetura por feature e mais adequada do que separar prematuramente em camadas complexas.
+## Caminho de uma chamada
 
-As responsabilidades ficaram assim:
+```text
+Tela React
+  → cliente HTTP /api/backend/<recurso>
+  → Route Handler Next.js
+  → WMS_API_BASE_URL/api/<recurso>
+  → backend Spring / banco de dados
+```
 
-- `src/app/page.tsx`: ponto de entrada da rota principal do Next.js. Ele apenas renderiza o painel.
-- `src/features/wms/WmsDashboard.tsx`: componente client-side com navegacao, telas e interacoes em RAM.
-- `src/features/wms/mock-data.ts`: dados simulados usados para apresentacao e testes visuais.
-- `src/features/wms/types.ts`: contratos TypeScript das entidades principais do WMS.
-- `src/app/globals.css`: tema visual, layout responsivo e componentes CSS reutilizados pelo painel.
+O navegador se comunica com a origem do Next.js. O proxy usa `WMS_API_BASE_URL` no servidor, encaminha Bearer e a chave de idempotência e define `X-Client-Type: WEB`. Essa variável não usa o prefixo `NEXT_PUBLIC_`; o endereço interno do backend permanece uma configuração de execução do servidor.
 
-Essa divisao facilita estudar o projeto porque cada arquivo tem um papel claro. Tambem facilita a evolucao futura: quando a API Java/Spring Boot existir, os arrays de `mock-data.ts` podem ser substituidos por chamadas HTTP sem reescrever a interface inteira.
+O proxy restringe os recursos encaminhados, rejeita caminhos inválidos, valida a origem das mutações, limita o tamanho do corpo e os tempos de espera e desabilita cache. O backend continua validando todas as permissões e regras de negócio.
 
-## O Que Foi Intencionalmente Excluido
+## Sessão e autorização
 
-As telas de execucao operacional do operador nao foram implementadas no painel web. Isso inclui:
+O login solicita um desafio por e-mail; a confirmação do código estabelece a sessão. O access token fica em memória. O refresh token permanece em cookie `HttpOnly`, administrado pelo navegador. O proxy adapta o caminho do cookie de `/api/auth` para `/api/backend/auth`.
 
-- conferencia fisica de recebimento;
-- execucao de putaway;
-- execucao de picking;
-- bipagem de LPN, SKU ou posicao;
-- inventario operacional via dispositivo.
+O cliente restaura a sessão por refresh, carrega `/users/me` e usa suas permissões para montar o painel. Requisições protegidas que recebem 401 tentam uma renovação e uma repetição. O 403 é apresentado como falta de acesso. A API decide a autorização efetiva mesmo quando a interface oculta uma ação.
 
-O painel apenas planeja, monitora, consulta e administra esses processos.
+As renovações concorrentes compartilham a mesma chamada na aba e usam Web Locks para coordenar abas compatíveis. O BroadcastChannel comunica mudança ou encerramento de sessão sem transmitir tokens. Em ambientes sem Web Locks, mantenha uma única aba autenticada; os detalhes e os limites estão no [guia de integração](INTEGRACAO_API.md).
 
-## Dados em Memoria
+## Consultas e comandos
 
-As acoes de tela alteram apenas estado local do React:
+As listas começam com 20 registros por página, permitem alterar o tamanho e enviam pesquisa e filtros ao servidor. Os seletores consultam `/lookups`, com cinco opções por página. Mudanças nos filtros reiniciam a paginação. Consultas canceladas ou pertencentes à sessão anterior não devem atualizar a nova tela.
 
-- liberar pre-recebimento para conferencia;
-- gerar onda FEFO a partir de pedidos pendentes;
-- cancelar pedido;
-- bloquear item de estoque.
+Cadastros usam os POST e PUT previstos no contrato. Comandos operacionais usam a chave de idempotência no header ou corpo conforme a API. Uma falha de rede pode ocorrer após a aplicação da transação; o cliente conserva a chave em memória para repetir o mesmo comando e orienta a atualização do estado antes de uma nova tentativa. Não há fila offline persistente.
 
-Ao recarregar a pagina, os dados voltam ao estado inicial. Isso e esperado nesta etapa, pois ainda nao ha backend nem banco de dados conectados.
+Quantidades são digitadas e mantidas como texto. A camada `ExactDecimal` serializa o valor como número JSON, preservando os dígitos informados; o parser conserva como texto literais que perderiam precisão com `number`. Saldos e totais operacionais vêm do servidor.
 
-## Evolucao Recomendada
+## Limites do painel
 
-Quando o backend estiver pronto, a evolucao natural seria:
+O web permite criar a expectativa documental de recebimento, planejar pedidos, gerar ondas, planejar transferências e acompanhar tarefas. Não há um endpoint de aprovação de pré-recebimento nem de atribuição manual de tarefas no contrato atual.
 
-1. criar uma camada `services` para chamadas HTTP;
-2. substituir `mock-data.ts` por fetch dos endpoints reais;
-3. adicionar autenticacao real do gestor;
-4. mover regras sensiveis para a API;
-5. manter o painel como interface de gestao e visualizacao.
+Conferência física de entrada, putaway, picking, conferência e despacho de LPN e contagem de inventário pertencem ao mobile. No painel, o livro razão oferece consulta de movimentos imutáveis; o inventário oferece acompanhamento. Homologação em armazém e testes em dispositivos reais são etapas posteriores de validação do sistema completo.

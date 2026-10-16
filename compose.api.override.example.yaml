@@ -1,0 +1,6 @@
+# Run from TCC_WMS with:
+# docker compose -f docker-compose.yml -f wms-saas-web/compose.api.override.example.yaml up -d --build web
+services:
+  web:
+    environment:
+      WMS_API_BASE_URL: http://backend:8080
