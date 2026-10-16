@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --require ./scripts/test-register.cjs scripts/run-tests.cjs",
+    "test:e2e": "node scripts/browser-tests.mjs"
   },
   "dependencies": {
     "next": "16.2.9",
@@ -21,6 +24,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "playwright": "1.59.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

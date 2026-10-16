@@ -1,0 +1,17 @@
+# Only send production inputs to the builder; exclude node_modules, .next, env and Git data.
+**
+!package.json
+!package-lock.json
+!next.config.ts
+!tsconfig.json
+!postcss.config.mjs
+!public/
+!public/**
+!src/
+!src/**
+
+**/.env
+**/.env.*
+**/*.key
+**/*.keystore
+**/*.jks
