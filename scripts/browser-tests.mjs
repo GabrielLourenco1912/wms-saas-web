@@ -69,6 +69,11 @@ try{
  await scenario('permissões reais escondem módulos e protegem navegação direta',async()=>{
   const readerContext=await browser.newContext({viewport:{width:1280,height:900}}),readerPage=await readerContext.newPage();await login(readerPage,'leitura@example.test');assert.equal(await readerPage.getByRole('link',{name:'Usuários Contas e perfis de acesso'}).count(),0);const before=fixture.calls.filter(call=>call.path==='/api/users').length;await readerPage.goto(base+'/gestao/users');await readerPage.getByText('Seu perfil não permite acessar este módulo.',{exact:false}).waitFor();assert.equal(fixture.calls.filter(call=>call.path==='/api/users').length,before);await readerContext.close();
  });
+ await scenario('documentação pública abre sem renovar sessão e permite voltar ao painel autenticado',async()=>{
+  await page.setViewportSize({width:1440,height:1000});await page.goto(base);await page.getByRole('heading',{name:'Visão geral',exact:true}).waitFor();await page.waitForLoadState('networkidle');const before=fixture.calls.length;
+  await page.getByRole('link',{name:'Documentação do projeto ↗',exact:true}).click();await page.getByRole('heading',{name:/Entenda como o.*WMS se conecta/}).waitFor();await page.waitForLoadState('networkidle');assert.equal(fixture.calls.length,before);
+  await page.getByRole('link',{name:'Entrar no painel',exact:false}).click();await page.waitForURL(base+'/');await page.getByRole('heading',{name:'Visão geral',exact:true}).waitFor();assert.equal(await page.locator('.account-link').innerText(),'Marina Gestora');
+ });
  await scenario('logout revoga refresh, limpa painel e mantém recuperação de senha pública',async()=>{
   await page.setViewportSize({width:1440,height:1000});await page.goto(base);await page.getByRole('button',{name:'Sair da conta'}).click();await page.waitForURL('**/auth/login');await page.getByLabel('E-mail',{exact:true}).waitFor();assert.equal((await context.cookies()).some(cookie=>cookie.name==='refresh_token'),false);await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(out,'login-mobile.png'),fullPage:true});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));await page.getByRole('link',{name:'Esqueci minha senha'}).click();await page.getByRole('button',{name:'Enviar código'}).waitFor();
  });

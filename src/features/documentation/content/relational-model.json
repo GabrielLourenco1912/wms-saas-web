@@ -1,0 +1,4196 @@
+{
+  "title": "Modelo relacional WMS — proposta v2",
+  "groups": [
+    {
+      "id": "estrutura",
+      "name": "Onde a mercadoria fica",
+      "label": "Estrutura física",
+      "color": "#2563eb",
+      "tables": [
+        "armazens",
+        "zonas",
+        "posicoes"
+      ],
+      "tip": "Armazém → zona → posição. A capacidade é validada antes de confirmar uma movimentação."
+    },
+    {
+      "id": "catalogo",
+      "name": "O que é movimentado",
+      "label": "Catálogo e parceiros",
+      "color": "#7c3aed",
+      "tables": [
+        "categorias",
+        "produtos",
+        "produto_embalagens",
+        "terceiros"
+      ],
+      "tip": "SKU identifica o produto. Embalagens convertem a quantidade para a unidade base. Terceiros são clientes e fornecedores."
+    },
+    {
+      "id": "acesso",
+      "name": "Quem pode fazer cada ação",
+      "label": "Usuários e permissões",
+      "color": "#475569",
+      "tables": [
+        "perfis",
+        "usuarios",
+        "permissoes",
+        "perfil_permissoes"
+      ],
+      "tip": "Perfil reúne permissões por recurso e ação. Usuário e perfil precisam estar ativos."
+    },
+    {
+      "id": "entrada",
+      "name": "O que foi solicitado e recebido",
+      "label": "Pedidos e recebimento",
+      "color": "#0891b2",
+      "tables": [
+        "pedidos",
+        "itens_pedido",
+        "conferencias_recebimento"
+      ],
+      "tip": "Pedido de entrada é expectativa. Saldo físico é criado somente após uma conferência aceita."
+    },
+    {
+      "id": "estoque",
+      "name": "Quanto existe e está disponível",
+      "label": "Estoque e LPNs",
+      "color": "#059669",
+      "tables": [
+        "lpns",
+        "estoque",
+        "bloqueios_estoque"
+      ],
+      "tip": "LPN agrupa mercadorias. Cada saldo preserva lote, validade e data original de entrada. Reserva não é uma baixa física."
+    },
+    {
+      "id": "execucao",
+      "name": "Como o trabalho é executado",
+      "label": "Ondas, tarefas e reservas",
+      "color": "#d97706",
+      "tables": [
+        "ondas_separacao",
+        "onda_pedidos",
+        "tarefas",
+        "reservas_estoque",
+        "historico_tarefas",
+        "divergencias_operacionais"
+      ],
+      "tip": "Ondas organizam tarefas. Reserva impede dupla alocação; uma falta gera divergência, bloqueio e tentativa de realocação."
+    },
+    {
+      "id": "inventario",
+      "name": "Como o saldo é reconciliado",
+      "label": "Inventário",
+      "color": "#be185d",
+      "tables": [
+        "inventarios",
+        "itens_inventario"
+      ],
+      "tip": "Contagem compara teórico e encontrado. A diferença gera um ajuste único, preservando o histórico."
+    },
+    {
+      "id": "auditoria",
+      "name": "Como cada movimento é preservado",
+      "label": "Operações e livro razão",
+      "color": "#334155",
+      "tables": [
+        "operacoes_wms",
+        "transacoes_estoque"
+      ],
+      "tip": "Operação identifica a confirmação e seus reenvios. Livro razão aceita novos lançamentos e correções compensatórias."
+    },
+    {
+      "id": "expedicao",
+      "name": "O que efetivamente saiu",
+      "label": "Expedição",
+      "color": "#dc2626",
+      "tables": [
+        "expedicoes",
+        "itens_expedicao"
+      ],
+      "tip": "Picking prepara mercadoria na doca. O despacho faz a baixa externa e atualiza a quantidade atendida."
+    }
+  ],
+  "tables": {
+    "armazens": {
+      "name": "armazens",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cnpj",
+          "type": "VARCHAR(14)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "endereco",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "estrutura",
+      "title": "Armazéns",
+      "purpose": "Unidades físicas da operação.",
+      "summary": [
+        "nome",
+        "ativo"
+      ],
+      "rules": "RF003"
+    },
+    "categorias": {
+      "name": "categorias",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "descricao",
+          "type": "TEXT",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        }
+      ],
+      "constraints": [],
+      "group": "catalogo",
+      "title": "Categorias",
+      "purpose": "Organização do catálogo.",
+      "summary": [
+        "nome",
+        "ativo"
+      ],
+      "rules": "RF004"
+    },
+    "estoque": {
+      "name": "estoque",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lote",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Mesmo limite das confirmações, bloqueios e snapshots."
+        },
+        {
+          "name": "data_validade",
+          "type": "DATE",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status_bloqueio",
+          "type": "VARCHAR(30)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "data_entrada_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Preservar em transferências e divisões."
+        },
+        {
+          "name": "conferencia_origem_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "conferencias_recebimento",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "versao",
+          "type": "BIGINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Padrão 0; não substitui bloqueios."
+        }
+      ],
+      "constraints": [
+        "quantidade >= 0. Uma camada por origem temporal; não unir entradas diferentes."
+      ],
+      "group": "estoque",
+      "title": "Saldos de estoque",
+      "purpose": "Quantidade por camada, lote e posição.",
+      "summary": [
+        "quantidade",
+        "data_validade",
+        "data_entrada_em"
+      ],
+      "rules": "RN003 / RN006 / RN007"
+    },
+    "itens_pedido": {
+      "name": "itens_pedido",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "pedidos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade_solicitada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_atendida",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Despachada na saída; conferida na entrada; padrão 0."
+        },
+        {
+          "name": "quantidade_separada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Preparada e ainda não despachada; padrão 0."
+        }
+      ],
+      "constraints": [
+        "separada + atendida <= solicitada; quantidades >= 0."
+      ],
+      "group": "entrada",
+      "title": "Itens do pedido",
+      "purpose": "Demanda, preparado e atendido.",
+      "summary": [
+        "quantidade_solicitada",
+        "quantidade_separada",
+        "quantidade_atendida"
+      ],
+      "rules": "RN010"
+    },
+    "lpns": {
+      "name": "lpns",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "codigo_rastreio",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(30)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "pedido_saida_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "pedidos",
+          "refField": "id",
+          "note": "Somente para LPN preparado para saída."
+        }
+      ],
+      "constraints": [],
+      "group": "estoque",
+      "title": "Unidades logísticas (LPN)",
+      "purpose": "Agrupam produtos para movimentação.",
+      "summary": [
+        "codigo_rastreio",
+        "posicao_id",
+        "pedido_saida_id"
+      ],
+      "rules": "RN004"
+    },
+    "onda_pedidos": {
+      "name": "onda_pedidos",
+      "new": false,
+      "fields": [
+        {
+          "name": "onda_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": "ondas_separacao",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": "pedidos",
+          "refField": "id",
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "PK composta (onda_id, pedido_id)."
+      ],
+      "group": "execucao",
+      "title": "Pedidos da onda",
+      "purpose": "Associação entre onda e pedido.",
+      "summary": [
+        "onda_id",
+        "pedido_id"
+      ],
+      "rules": "RF008"
+    },
+    "ondas_separacao": {
+      "name": "ondas_separacao",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "codigo_onda",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(30)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "armazem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "armazens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "criado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cancelado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo_cancelamento",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "execucao",
+      "title": "Ondas de separação",
+      "purpose": "Agrupam a execução dos pedidos.",
+      "summary": [
+        "codigo_onda",
+        "status"
+      ],
+      "rules": "RF008 / RF015"
+    },
+    "pedidos": {
+      "name": "pedidos",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "terceiro_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "terceiros",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "numero_documento",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "data_prevista",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(30)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "armazem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "armazens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "criado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cancelado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo_cancelamento",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "entrada",
+      "title": "Pedidos",
+      "purpose": "Expectativa de entrada ou saída.",
+      "summary": [
+        "tipo",
+        "armazem_id",
+        "status"
+      ],
+      "rules": "RN010 / RN017"
+    },
+    "posicoes": {
+      "name": "posicoes",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "zona_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "zonas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "codigo",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "capacidade_peso_kg",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "capacidade_volume_m3",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        },
+        {
+          "name": "finalidade",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "RECEBIMENTO, ARMAZENAGEM ou EXPEDICAO."
+        }
+      ],
+      "constraints": [
+        "UNIQUE(zona_id, codigo). Leitura com contexto da zona/armazém.",
+        "Capacidade > 0 quando controlada; NULL representa ausência de limite."
+      ],
+      "group": "estrutura",
+      "title": "Posições",
+      "purpose": "Endereços, docas e limites físicos.",
+      "summary": [
+        "zona_id",
+        "finalidade",
+        "capacidade_peso_kg"
+      ],
+      "rules": "RN005"
+    },
+    "produto_embalagens": {
+      "name": "produto_embalagens",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "fator_conversao",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Maior que zero; quantidade informada × fator = unidade base."
+        },
+        {
+          "name": "codigo_barras",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "peso_kg",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "volume_m3",
+          "type": "DECIMAL(10,3)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        }
+      ],
+      "constraints": [
+        "fator_conversao > 0."
+      ],
+      "group": "catalogo",
+      "title": "Embalagens",
+      "purpose": "Código e conversão de quantidade.",
+      "summary": [
+        "produto_id",
+        "fator_conversao"
+      ],
+      "rules": "RF004"
+    },
+    "produtos": {
+      "name": "produtos",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "categoria_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "categorias",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "sku",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(150)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "controle_lote",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "controle_validade",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "dias_shelf_life",
+          "type": "INT",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "unidade_base",
+          "type": "VARCHAR(10)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "peso_unitario_kg",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "volume_unitario_m3",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "catalogo",
+      "title": "Produtos",
+      "purpose": "SKU, unidade base e rastreabilidade.",
+      "summary": [
+        "sku",
+        "controle_lote",
+        "controle_validade"
+      ],
+      "rules": "RN006"
+    },
+    "tarefas": {
+      "name": "tarefas",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(30)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "prioridade",
+          "type": "INT",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "onda_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "ondas_separacao",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "pedidos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "usuario_atribuido_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_origem_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_destino_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade_alvo",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_realizada",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Nula antes da confirmação; pode ser zero em falta."
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "item_pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_pedido",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "estoque_origem_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_destino_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tarefa_origem_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "tarefas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "iniciado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "concluido_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cancelado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo_cancelamento",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "versao",
+          "type": "BIGINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Transições controladas; quantidade realizada exigida na confirmação."
+      ],
+      "group": "execucao",
+      "title": "Tarefas operacionais",
+      "purpose": "Putaway, picking e movimentações.",
+      "summary": [
+        "status",
+        "quantidade_alvo",
+        "quantidade_realizada"
+      ],
+      "rules": "RN008 / RN014 / RN015"
+    },
+    "terceiros": {
+      "name": "terceiros",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "razao_social",
+          "type": "VARCHAR(150)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cpf_cnpj",
+          "type": "VARCHAR(14)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(30)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "catalogo",
+      "title": "Clientes e fornecedores",
+      "purpose": "Parceiros vinculados aos pedidos.",
+      "summary": [
+        "razao_social",
+        "tipo"
+      ],
+      "rules": "RF005A / RF008"
+    },
+    "transacoes_estoque": {
+      "name": "transacoes_estoque",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "usuario_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tarefa_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "tarefas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tipo_movimento",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "posicao_anterior_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_nova_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "saldo_resultante",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "data_hora",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "operacao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "operacoes_wms",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "sequencia",
+          "type": "INT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "estoque_destino_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_destino_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lote_registrado",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "validade_registrada",
+          "type": "DATE",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "entrada_registrada_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "saldo_anterior",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "saldo_destino_anterior",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "saldo_destino_resultante",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "transacao_compensada_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "transacoes_estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Obrigatório em ajuste/compensação."
+        },
+        {
+          "name": "inventario_item_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_inventario",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "expedicao_item_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_expedicao",
+          "refField": "id",
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "UNIQUE(operacao_id, sequencia). INSERT/SELECT; rejeitar UPDATE/DELETE.",
+        "Correção cria lançamento compensatório vinculado ao original."
+      ],
+      "group": "auditoria",
+      "title": "Livro razão de estoque",
+      "purpose": "Lançamentos imutáveis e compensações.",
+      "summary": [
+        "tipo_movimento",
+        "quantidade",
+        "transacao_compensada_id"
+      ],
+      "rules": "RN002"
+    },
+    "usuarios": {
+      "name": "usuarios",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "email",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cargo",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "senha_hash",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Hash BCrypt; nunca senha em texto claro."
+        },
+        {
+          "name": "perfil_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "perfis",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        },
+        {
+          "name": "atualizado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "acesso",
+      "title": "Usuários",
+      "purpose": "Pessoas que acessam o sistema.",
+      "summary": [
+        "perfil_id",
+        "email",
+        "ativo"
+      ],
+      "rules": "RN001 / RN012"
+    },
+    "zonas": {
+      "name": "zonas",
+      "new": false,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "armazem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "armazens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo_controle",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "TRUE para cadastro utilizável."
+        }
+      ],
+      "constraints": [],
+      "group": "estrutura",
+      "title": "Zonas",
+      "purpose": "Divisões internas de um armazém.",
+      "summary": [
+        "armazem_id",
+        "nome"
+      ],
+      "rules": "RF003"
+    },
+    "perfis": {
+      "name": "perfis",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "nome",
+          "type": "VARCHAR(50)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "acesso",
+      "title": "Perfis",
+      "purpose": "Gestor, operador e permissões.",
+      "summary": [
+        "nome",
+        "ativo"
+      ],
+      "rules": "RN001 / RN012"
+    },
+    "permissoes": {
+      "name": "permissoes",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "recurso",
+          "type": "VARCHAR(60)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "acao",
+          "type": "VARCHAR(60)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "UNIQUE(recurso, acao)."
+      ],
+      "group": "acesso",
+      "title": "Permissões",
+      "purpose": "Ações permitidas em cada recurso.",
+      "summary": [
+        "recurso",
+        "acao"
+      ],
+      "rules": "RN012"
+    },
+    "perfil_permissoes": {
+      "name": "perfil_permissoes",
+      "new": true,
+      "fields": [
+        {
+          "name": "perfil_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": "perfis",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "permissao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": "permissoes",
+          "refField": "id",
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "PK composta (perfil_id, permissao_id)."
+      ],
+      "group": "acesso",
+      "title": "Permissões do perfil",
+      "purpose": "Associação entre perfil e permissão.",
+      "summary": [
+        "perfil_id",
+        "permissao_id"
+      ],
+      "rules": "RN012"
+    },
+    "reservas_estoque": {
+      "name": "reservas_estoque",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tarefa_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": "tarefas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "item_pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_pedido",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade_reservada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_consumida",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_liberada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(15)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "encerrado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "motivo_encerramento",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "UNIQUE(tarefa_id). consumida + liberada <= reservada; reservada > 0.",
+        "Disponível = físico − parcelas remanescentes de reservas ativas."
+      ],
+      "group": "execucao",
+      "title": "Reservas de estoque",
+      "purpose": "Parcela do saldo destinada a uma tarefa.",
+      "summary": [
+        "quantidade_reservada",
+        "quantidade_consumida",
+        "quantidade_liberada"
+      ],
+      "rules": "RN013"
+    },
+    "conferencias_recebimento": {
+      "name": "conferencias_recebimento",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "item_pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_pedido",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "embalagem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produto_embalagens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade_informada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_base",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "lote",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Obrigatório quando produto exige lote."
+        },
+        {
+          "name": "data_validade",
+          "type": "DATE",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": "Obrigatória quando produto exige validade."
+        },
+        {
+          "name": "usuario_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "operacao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "operacoes_wms",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "conferido_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "entrada",
+      "title": "Conferência de recebimento",
+      "purpose": "Mercadoria aceita após a conferência.",
+      "summary": [
+        "item_pedido_id",
+        "quantidade_base",
+        "lpn_id"
+      ],
+      "rules": "RN006 / RN017"
+    },
+    "historico_tarefas": {
+      "name": "historico_tarefas",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tarefa_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "tarefas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "status_anterior",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status_novo",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "usuario_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "operacao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "operacoes_wms",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo",
+          "type": "VARCHAR(255)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "registrado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Eventos preservados; somente inserção e consulta."
+      ],
+      "group": "execucao",
+      "title": "Histórico das tarefas",
+      "purpose": "Eventos e transições preservados.",
+      "summary": [
+        "tarefa_id",
+        "status_novo",
+        "registrado_em"
+      ],
+      "rules": "RN011 / RN014"
+    },
+    "divergencias_operacionais": {
+      "name": "divergencias_operacionais",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tarefa_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "tarefas",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "usuario_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade_prevista",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_realizada",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_faltante",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "motivo",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "resolvido_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "autorizado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "autorizado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [],
+      "group": "execucao",
+      "title": "Divergências",
+      "purpose": "Falta ou excesso e seu tratamento.",
+      "summary": [
+        "tarefa_id",
+        "quantidade_faltante",
+        "status"
+      ],
+      "rules": "RN008 / RN009"
+    },
+    "bloqueios_estoque": {
+      "name": "bloqueios_estoque",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "armazem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "armazens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(15)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "ativo",
+          "type": "TINYINT",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "lote",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "motivo",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "liberado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "liberado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Alvo: estoque OU produto+lote OU posição. Recalcular status_bloqueio."
+      ],
+      "group": "estoque",
+      "title": "Bloqueios",
+      "purpose": "Impedimentos por saldo, lote ou posição.",
+      "summary": [
+        "tipo",
+        "ativo",
+        "motivo"
+      ],
+      "rules": "RN003 / RN009"
+    },
+    "inventarios": {
+      "name": "inventarios",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "armazem_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "armazens",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "usuario_responsavel_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "concluido_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "cancelado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Estabilizar posição antes de contar e aplicar diferenças."
+      ],
+      "group": "inventario",
+      "title": "Inventários",
+      "purpose": "Contagem controlada de uma posição.",
+      "summary": [
+        "posicao_id",
+        "status"
+      ],
+      "rules": "RN016 / RF017"
+    },
+    "itens_inventario": {
+      "name": "itens_inventario",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "inventario_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "inventarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "produto_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "produtos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lote",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "data_validade",
+          "type": "DATE",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_teorica",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "quantidade_contada",
+          "type": "DECIMAL(18,6)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "usuario_contagem_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "contado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "aplicado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "operacao_aplicacao_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "operacoes_wms",
+          "refField": "id",
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Aplicação única; ajuste = contada − teórica."
+      ],
+      "group": "inventario",
+      "title": "Itens do inventário",
+      "purpose": "Teórico, contagem e aplicação única.",
+      "summary": [
+        "quantidade_teorica",
+        "quantidade_contada",
+        "aplicado_em"
+      ],
+      "rules": "RN006 / RN016"
+    },
+    "expedicoes": {
+      "name": "expedicoes",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "pedidos",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "posicao_doca_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "posicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "despachado_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "despachado_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "Despacho reduz físico e atualiza quantidade atendida; repetição sem nova baixa."
+      ],
+      "group": "expedicao",
+      "title": "Expedições",
+      "purpose": "Carga preparada, conferida e despachada.",
+      "summary": [
+        "pedido_id",
+        "status",
+        "despachado_em"
+      ],
+      "rules": "RN010 / RF013"
+    },
+    "itens_expedicao": {
+      "name": "itens_expedicao",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "expedicao_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "expedicoes",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "item_pedido_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "itens_pedido",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "estoque_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "estoque",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "lpn_id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": "lpns",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "quantidade",
+          "type": "DECIMAL(18,6)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "conferido_por_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "conferido_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "UNIQUE(expedicao_id, estoque_id)."
+      ],
+      "group": "expedicao",
+      "title": "Itens da expedição",
+      "purpose": "Parcela física do LPN na carga.",
+      "summary": [
+        "lpn_id",
+        "quantidade",
+        "status"
+      ],
+      "rules": "RN010 / RN015"
+    },
+    "operacoes_wms": {
+      "name": "operacoes_wms",
+      "new": true,
+      "fields": [
+        {
+          "name": "id",
+          "type": "VARCHAR(26)",
+          "nullable": false,
+          "pk": true,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "chave_idempotencia",
+          "type": "VARCHAR(64)",
+          "nullable": false,
+          "pk": false,
+          "unique": true,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "tipo",
+          "type": "VARCHAR(40)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "usuario_id",
+          "type": "VARCHAR(26)",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": "usuarios",
+          "refField": "id",
+          "note": ""
+        },
+        {
+          "name": "hash_requisicao",
+          "type": "VARCHAR(64)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "status",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "criado_em",
+          "type": "DATETIME_F",
+          "nullable": false,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "concluido_em",
+          "type": "DATETIME_F",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        },
+        {
+          "name": "resultado",
+          "type": "JSON",
+          "nullable": true,
+          "pk": false,
+          "unique": false,
+          "ref": null,
+          "refField": null,
+          "note": ""
+        }
+      ],
+      "constraints": [
+        "UNIQUE(chave_idempotencia). Mesma chave com conteúdo diferente é conflito."
+      ],
+      "group": "auditoria",
+      "title": "Confirmações de operação",
+      "purpose": "Identidade da solicitação e resultado.",
+      "summary": [
+        "chave_idempotencia",
+        "status"
+      ],
+      "rules": "RNF007 / RNF009"
+    }
+  },
+  "relationships": [
+    {
+      "child": "perfil_permissoes",
+      "parent": "perfis",
+      "field": "perfil_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "perfil_permissoes",
+      "parent": "permissoes",
+      "field": "permissao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "itens_pedido",
+      "field": "item_pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "produto_embalagens",
+      "field": "embalagem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "usuarios",
+      "field": "usuario_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "conferencias_recebimento",
+      "parent": "operacoes_wms",
+      "field": "operacao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "armazens",
+      "field": "armazem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "usuarios",
+      "field": "criado_por_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "bloqueios_estoque",
+      "parent": "usuarios",
+      "field": "liberado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "reservas_estoque",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "reservas_estoque",
+      "parent": "tarefas",
+      "field": "tarefa_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": true,
+      "essential": true
+    },
+    {
+      "child": "reservas_estoque",
+      "parent": "itens_pedido",
+      "field": "item_pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "historico_tarefas",
+      "parent": "tarefas",
+      "field": "tarefa_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "historico_tarefas",
+      "parent": "usuarios",
+      "field": "usuario_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "historico_tarefas",
+      "parent": "operacoes_wms",
+      "field": "operacao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "divergencias_operacionais",
+      "parent": "tarefas",
+      "field": "tarefa_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "divergencias_operacionais",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "divergencias_operacionais",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "divergencias_operacionais",
+      "parent": "usuarios",
+      "field": "usuario_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "divergencias_operacionais",
+      "parent": "usuarios",
+      "field": "autorizado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "inventarios",
+      "parent": "armazens",
+      "field": "armazem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "inventarios",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "inventarios",
+      "parent": "usuarios",
+      "field": "usuario_responsavel_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "inventarios",
+      "field": "inventario_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "usuarios",
+      "field": "usuario_contagem_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_inventario",
+      "parent": "operacoes_wms",
+      "field": "operacao_aplicacao_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "operacoes_wms",
+      "parent": "usuarios",
+      "field": "usuario_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "expedicoes",
+      "parent": "pedidos",
+      "field": "pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "expedicoes",
+      "parent": "posicoes",
+      "field": "posicao_doca_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "expedicoes",
+      "parent": "usuarios",
+      "field": "criado_por_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "expedicoes",
+      "parent": "usuarios",
+      "field": "despachado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_expedicao",
+      "parent": "expedicoes",
+      "field": "expedicao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "itens_expedicao",
+      "parent": "itens_pedido",
+      "field": "item_pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_expedicao",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_expedicao",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_expedicao",
+      "parent": "usuarios",
+      "field": "conferido_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "estoque",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "estoque",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "estoque",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "estoque",
+      "parent": "conferencias_recebimento",
+      "field": "conferencia_origem_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "itens_pedido",
+      "parent": "pedidos",
+      "field": "pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "itens_pedido",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "lpns",
+      "parent": "posicoes",
+      "field": "posicao_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "lpns",
+      "parent": "pedidos",
+      "field": "pedido_saida_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "onda_pedidos",
+      "parent": "ondas_separacao",
+      "field": "onda_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "onda_pedidos",
+      "parent": "pedidos",
+      "field": "pedido_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "ondas_separacao",
+      "parent": "armazens",
+      "field": "armazem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "ondas_separacao",
+      "parent": "usuarios",
+      "field": "criado_por_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "ondas_separacao",
+      "parent": "usuarios",
+      "field": "cancelado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "pedidos",
+      "parent": "terceiros",
+      "field": "terceiro_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "pedidos",
+      "parent": "armazens",
+      "field": "armazem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "pedidos",
+      "parent": "usuarios",
+      "field": "criado_por_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "pedidos",
+      "parent": "usuarios",
+      "field": "cancelado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "posicoes",
+      "parent": "zonas",
+      "field": "zona_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "produto_embalagens",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "produtos",
+      "parent": "categorias",
+      "field": "categoria_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "tarefas",
+      "parent": "ondas_separacao",
+      "field": "onda_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "tarefas",
+      "parent": "usuarios",
+      "field": "usuario_atribuido_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "posicoes",
+      "field": "posicao_origem_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "posicoes",
+      "field": "posicao_destino_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "pedidos",
+      "field": "pedido_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "itens_pedido",
+      "field": "item_pedido_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "estoque",
+      "field": "estoque_origem_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "lpns",
+      "field": "lpn_destino_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "tarefas",
+      "field": "tarefa_origem_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "tarefas",
+      "parent": "usuarios",
+      "field": "cancelado_por_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "produtos",
+      "field": "produto_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "usuarios",
+      "field": "usuario_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "tarefas",
+      "field": "tarefa_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "lpns",
+      "field": "lpn_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "posicoes",
+      "field": "posicao_anterior_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "posicoes",
+      "field": "posicao_nova_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "operacoes_wms",
+      "field": "operacao_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "estoque",
+      "field": "estoque_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "estoque",
+      "field": "estoque_destino_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "lpns",
+      "field": "lpn_destino_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "transacoes_estoque",
+      "field": "transacao_compensada_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "itens_inventario",
+      "field": "inventario_item_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "transacoes_estoque",
+      "parent": "itens_expedicao",
+      "field": "expedicao_item_id",
+      "parentField": "id",
+      "optional": true,
+      "unique": false,
+      "essential": false
+    },
+    {
+      "child": "usuarios",
+      "parent": "perfis",
+      "field": "perfil_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    },
+    {
+      "child": "zonas",
+      "parent": "armazens",
+      "field": "armazem_id",
+      "parentField": "id",
+      "optional": false,
+      "unique": false,
+      "essential": true
+    }
+  ],
+  "version": "2",
+  "scope": "Modelo relacional aprovado no artigo: 29 tabelas de modelagem; o banco Flyway possui 30 tabelas físicas, incluindo acesso e sessão.",
+  "source": {
+    "version": "V2",
+    "reviewedAt": "15/10/2026",
+    "htmlSha256": "549d29e8ed884a646ffa2c631fcd194efd6916292a96f717e2b535c87eb5bf57",
+    "mwbSha256": "565c19ea432005810aea295e219ae4854e60e8410d7e7c00c2f580f83cb008df",
+    "pngSha256": "3c226b0779d2ee45125caf86daea495287e109ce49732178d88dbff94882fb48"
+  }
+}

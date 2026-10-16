@@ -7,14 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "node --require ./scripts/test-register.cjs scripts/run-tests.cjs",
-    "test:e2e": "node scripts/browser-tests.mjs"
+    "test:e2e": "node scripts/browser-tests.mjs",
+    "docs:sync": "python3 scripts/sync-public-docs.py",
+    "test:docs": "node scripts/documentation-browser-tests.mjs"
   },
   "dependencies": {
     "next": "16.2.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

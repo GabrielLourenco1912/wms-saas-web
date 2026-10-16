@@ -9,7 +9,7 @@ export function AuthFrame({ title, subtitle, children }: { title: string; subtit
       <p>O acesso é concedido pelo gestor. Cada pessoa utiliza sua própria conta e as permissões do seu perfil.</p>
     </section>
     <section className="login-panel" aria-labelledby="auth-title">
-      <div className="login-card"><div className="brand-block login-brand"><div className="brand-mark" aria-hidden="true">W</div><div><h2 id="auth-title">{title}</h2><span>{subtitle}</span></div></div>{children}</div>
+      <div className="login-card"><div className="brand-block login-brand"><div className="brand-mark" aria-hidden="true">W</div><div><h2 id="auth-title">{title}</h2><span>{subtitle}</span></div></div>{children}<div className="auth-public-resources"><Link className="auth-documentation-link" href="/documentacao">Documentação pública: API e modelo relacional ↗</Link></div></div>
     </section>
   </main>;
 }

@@ -14,17 +14,20 @@ O contrato de referência é [API_CLIENTS.md](../../wms-saas-backend/docs/API_CL
 src/
   app/
     api/backend/[...path]/route.ts  # Proxy de mesma origem para a API Spring
-    auth/                          # Entrada e recuperação de senha
-    gestao/[section]/page.tsx       # URLs dos módulos gerenciais
+    (application)/                # Layout com AuthProvider; preserva URLs existentes
+      auth/                        # Entrada e recuperação de senha
+      gestao/[section]/page.tsx     # URLs dos módulos gerenciais
+      page.tsx                     # Entrada do painel
+    (public)/documentacao/         # API e modelo, sem sessão ou chamadas ao backend
     globals.css                    # Tema, componentes e adaptação de layout
     layout.tsx                     # Composição global do aplicativo
-    page.tsx                       # Entrada do painel
   components/wms/
     ApiLookup.tsx                  # Pesquisa de vínculos, cinco opções por página
     EntityForm.tsx                 # Campos e submissão de cadastros
     ResourceTable.tsx              # Listas pesquisáveis e paginadas
     primitives.tsx                 # Modais, detalhes, avisos e estados
   features/
+    documentation/                 # Markdown público, índices, catálogo e modelo interativo
     auth/                          # Sessão, MFA, identidade e permissões
     catalog/                       # Estrutura física, produtos e parceiros
     dashboard/                     # Totais e filas retornados pela API
@@ -81,3 +84,13 @@ Quantidades são digitadas e mantidas como texto. A camada `ExactDecimal` serial
 O web permite criar a expectativa documental de recebimento, planejar pedidos, gerar ondas, planejar transferências e acompanhar tarefas. Não há um endpoint de aprovação de pré-recebimento nem de atribuição manual de tarefas no contrato atual.
 
 Conferência física de entrada, putaway, picking, conferência e despacho de LPN e contagem de inventário pertencem ao mobile. No painel, o livro razão oferece consulta de movimentos imutáveis; o inventário oferece acompanhamento. Homologação em armazém e testes em dispositivos reais são etapas posteriores de validação do sistema completo.
+
+## Referências públicas
+
+`/documentacao/api` publica os guias existentes em React, preservando tabelas GFM, exemplos e âncoras de modelos; blocos copiáveis e pesquisa de endpoints são componentes de cliente. O Markdown é renderizado no servidor, com HTML bruto desabilitado e links locais de código apresentados como rótulos. Nenhuma ação executa endpoints documentados.
+
+`/documentacao/modelo-relacional` reúne o explorador por áreas e o PNG aprovado ampliável. A seleção usa fragmentos `#tabela-<nome>`, permitindo compartilhar e recarregar a referência. Tipos, campos e chaves vêm do MWB; descrições de domínio vêm do HTML anterior. As regras e os tipos da figura são diferenciados do DDL de implantação.
+
+`npm run docs:sync` gera snapshots JSON e assets estáticos a partir da cópia completa do projeto. O build e o runtime utilizam apenas os arquivos versionados do submódulo web. Não há leitura do diretório pai no servidor nem busca remota dos documentos. Ao modificar fontes, sincronizar e revisar o diff; `npm run docs:sync -- --check` detecta snapshots desatualizados.
+
+A separação dos grupos `(application)` e `(public)` garante que ler documentação não inicialize refresh, carregue `/users/me` ou dependa de disponibilidade da API. A navegação para o painel restaura a sessão normalmente. Há testes de acesso público, âncoras, busca, downloads, vínculos, recarga, zoom, responsividade e regressão da sessão.

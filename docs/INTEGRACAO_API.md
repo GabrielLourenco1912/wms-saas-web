@@ -132,10 +132,19 @@ npm run typecheck
 npm test
 npm run build
 npm run test:e2e
+npm run test:docs
 ```
 
-A execução consolidada desta entrega passou em `npm run lint`, `npm run typecheck`, `npm test` e `npm run build`. A suíte Node tem **68 testes aprovados**, cobrindo contratos de domínio, sessão, concorrência, idempotência, decimais e isolamento do proxy. Também passaram **13 cenários de navegador**, incluindo login com código, cookies HttpOnly, duas abas com refresh rotativo, permissões, pesquisa, formulários e larguras de 320/390 pixels. Os testes em navegador são executados sobre o servidor Next de produção e uma API HTTP descartável com respostas controladas; as capturas ficam em `/tmp/wms-web-review` por padrão (`WMS_SCREENSHOT_DIR` altera o destino).
+A execução consolidada desta entrega passou em `npm run lint`, `npm run typecheck`, `npm test` e `npm run build`. A suíte Node tem **77 testes aprovados**, cobrindo contratos de domínio, sessão, concorrência, idempotência, decimais e isolamento do proxy. Também passaram **14 cenários de navegador**, incluindo login com código, cookies HttpOnly, duas abas com refresh rotativo, permissões, pesquisa, formulários e larguras de 320/390 pixels. Os testes em navegador são executados sobre o servidor Next de produção e uma API HTTP descartável com respostas controladas; as capturas ficam em `/tmp/wms-web-review` por padrão (`WMS_SCREENSHOT_DIR` altera o destino).
 
 Para o navegador de testes, instale o Chromium do Playwright com `npx playwright install chromium` ou informe um Chrome/Chromium existente em `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. O script usa uma porta local livre, encerra os processos criados e pode ser executado após o build. Quando há saída standalone, prepara os assets e executa esse servidor, reproduzindo a forma de distribuição do painel. Os testes do cliente podem usar respostas controladas para reproduzir páginas vazias, recusas de permissão, erros de rede, rotação de sessão e comandos repetidos. Isso valida comportamentos da interface e do transporte; não representa homologação com o Spring, o banco, o serviço de e-mail ou um armazém.
 
+Também passaram **sete cenários de documentação pública**, com o backend indisponível: acesso sem sessão, âncoras de DTOs, busca, cópia, guias e downloads, filtros e FK do modelo, recarga da seleção, zoom e larguras de 320/390 pixels. As capturas ficam em `/tmp/wms-public-documentation`. O teste de regressão do painel verifica a ida à documentação e a volta à sessão autenticada.
+
 A homologação posterior deve usar a API configurada e contemplar: login com código real; criação e inativação de cadastros; documentos de entrada e saída; geração e cancelamento de ondas; acompanhamento dos comandos realizados no mobile; bloqueios e liberações; leitura do histórico e livro razão; permissões distintas; expiração de sessão; concorrência entre abas e falhas de rede. O ambiente completo e os processos físicos exigem validação própria.
+
+## Consulta pública desta documentação
+
+O painel publica esta referência em `/documentacao/api?guia=web`, o catálogo completo em `/documentacao/api` e o guia móvel em `/documentacao/api?guia=mobile`. As páginas preservam exemplos, permissões, payloads e respostas, com índice pesquisável, links entre modelos, pesquisa de endpoints e cópia de código. O modelo relacional pode ser explorado em `/documentacao/modelo-relacional`, incluindo links diretos como `#tabela-estoque`.
+
+Essas rotas não exigem login e não executam chamadas à API. Os exemplos são documentação; não há console que envie comandos ou solicite tokens. Os assets estáticos incluem os guias Markdown e o PNG aprovado. Para atualizar o conteúdo publicado, executar `npm run docs:sync` na cópia completa de `TCC_WMS` e revisar os snapshots, conforme o README. A sincronização não faz parte do build e os documentos originais permanecem preservados.
