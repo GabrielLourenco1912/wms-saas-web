@@ -203,7 +203,7 @@ As imagens são PNGs de classpath incorporados por CID, sem carregamento remoto.
 
 ### Fonte de verdade e recursos versionados
 
-`tokens.json`, a geometria do ícone e os originais da assinatura são a fonte para três scripts manuais: `wms-saas-web/scripts/sync-branding.py`, `wms_saas_mobile/scripts/sync_branding.py` e `wms-saas-backend/ops/sync-email-branding.py`. Cada script oferece `--check` para verificar seus recursos.
+`tokens.json`, a geometria do ícone e os originais da assinatura são a fonte para os scripts manuais `wms-saas-web/scripts/sync-branding.py` e `wms_saas_mobile/scripts/sync_branding.py`, que oferecem `--check`. Nos e-mails, tokens, constantes e imagens já estão versionados no backend e são mantidos diretamente, conforme o guia técnico de e-mails.
 
 As cópias necessárias ficam versionadas em cada aplicação. Build e execução não leem `docs-gerais`. Ao alterar tokens, regenerar os recursos necessários, sincronizar os três canais e repetir suas verificações. Guias técnicos: [web](/branding/downloads/guia-aplicacao-web.md), [mobile](/branding/downloads/guia-aplicacao-mobile.md) e [e-mails](/branding/downloads/guia-aplicacao-emails.md).
 

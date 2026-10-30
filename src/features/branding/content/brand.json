@@ -494,8 +494,8 @@
     {
       "url": "/branding/downloads/guia-de-marca.md",
       "path": "public/branding/downloads/guia-de-marca.md",
-      "sha256": "065f0d934d766bf3f900e0104e73083c1a052b8ae311d7dc12892aa6471ad9df",
-      "bytes": 21873
+      "sha256": "cf9b2ac1702a43c547f7a7e658dc57562d32c1085f6fb5a73d7e58076bc892ad",
+      "bytes": 21928
     },
     {
       "url": "/branding/downloads/guia-do-icone.md",
@@ -524,8 +524,8 @@
     {
       "url": "/branding/downloads/guia-aplicacao-emails.md",
       "path": "public/branding/downloads/guia-aplicacao-emails.md",
-      "sha256": "e0b3b849fdb54b7b905ba56305cf6e5c4f63e58b15f297568ff1de0d9b9b9df2",
-      "bytes": 4389
+      "sha256": "1aa9c94dc1b83fbe4102f4f7aa2602b1ed183105e4992bf2dc8ad05ae749623f",
+      "bytes": 4432
     }
   ]
 }
