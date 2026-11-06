@@ -8,9 +8,21 @@ async function proxy(request:NextRequest, context:{params:Promise<{path:string[]
   const {path} = await context.params;
   if (!path.length || !resources.has(path[0]) || path.some(segment => segment === '.' || segment === '..' || /[\\/]/.test(segment))) return error(404,'Recurso não encontrado.');
   if (request.method !== 'GET') {
+    let expectedOrigin: string;
+    try {
+      const configured = new URL(process.env.WEB_ORIGIN ?? '');
+      if (!['http:', 'https:'].includes(configured.protocol) || configured.username || configured.password ||
+          configured.pathname !== '/' || configured.search || configured.hash) throw new Error();
+      expectedOrigin = configured.origin;
+    } catch {
+      return error(503, 'A origem pública do painel não está configurada corretamente.');
+    }
     const origin = request.headers.get('origin');
-    try { const expected = new URL(request.nextUrl); expected.host = request.headers.get('host') ?? expected.host; if (!origin || new URL(origin).origin !== expected.origin) return error(403,'Origem da solicitação inválida.'); }
-    catch { return error(403,'Origem da solicitação inválida.'); }
+    try {
+      if (!origin || new URL(origin).origin !== expectedOrigin) return error(403, 'Origem da solicitação inválida.');
+    } catch {
+      return error(403, 'Origem da solicitação inválida.');
+    }
   }
   const configured = process.env.WMS_API_BASE_URL ?? 'http://localhost:8080';
   let base:URL;

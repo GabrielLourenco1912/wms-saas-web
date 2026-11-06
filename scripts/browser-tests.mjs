@@ -12,7 +12,7 @@ const fixture=await startFixture(),portServer=net.createServer();await new Promi
 const base=`http://127.0.0.1:${port}`,out=process.env.WMS_SCREENSHOT_DIR??'/tmp/wms-web-review';fs.mkdirSync(out,{recursive:true});
 const standalone=fs.existsSync('.next/standalone/server.js');
 if(standalone){fs.cpSync('.next/static','.next/standalone/.next/static',{recursive:true});if(fs.existsSync('public'))fs.cpSync('public','.next/standalone/public',{recursive:true});}
-const app=spawn(process.execPath,standalone?['.next/standalone/server.js']:['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(port)],{env:{...process.env,WMS_API_BASE_URL:fixture.url,HOSTNAME:'127.0.0.1',PORT:String(port)},stdio:['ignore','pipe','pipe']});let log='';app.stdout.on('data',chunk=>{log+=chunk;});app.stderr.on('data',chunk=>{log+=chunk;});
+const app=spawn(process.execPath,standalone?['.next/standalone/server.js']:['node_modules/next/dist/bin/next','start','--hostname','127.0.0.1','--port',String(port)],{env:{...process.env,WEB_ORIGIN:base,WMS_API_BASE_URL:fixture.url,HOSTNAME:'127.0.0.1',PORT:String(port)},stdio:['ignore','pipe','pipe']});let log='';app.stdout.on('data',chunk=>{log+=chunk;});app.stderr.on('data',chunk=>{log+=chunk;});
 let browser;const failures=[];let passed=0;
 async function scenario(name,run){try{await run();console.log(`✓ ${name}`);passed++;}catch(error){failures.push(name);throw error;}}
 async function login(page,email='gestor@example.test'){
@@ -48,6 +48,9 @@ try{
  await scenario('abas concorrentes compartilham cookie rotativo com Web Locks',async()=>{
   const tab=await context.newPage();await tab.goto(base+'/gestao/products');await tab.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();const before=fixture.refreshes;
   await Promise.all([page.reload(),tab.reload()]);await Promise.all([page.getByRole('cell',{name:'SKU-001',exact:true}).waitFor(),tab.getByRole('cell',{name:'SKU-001',exact:true}).waitFor()]);assert.equal(fixture.refreshes,before+2);await tab.close();
+ });
+ await scenario('proxy aceita origem pública configurada com Host e protocolo internos diferentes',async()=>{
+  const before=fixture.calls.length;const response=await fetch(base+'/api/backend/auth/login',{method:'POST',headers:{Origin:base,Host:'web:3000','X-Forwarded-Proto':'https','Content-Type':'application/json'},body:JSON.stringify({email:'gestor@example.test',password:'senha123'})});assert.equal(response.status,202);assert.equal(fixture.calls.length,before+1);assert.equal(fixture.calls.at(-1).path,'/api/auth/login');
  });
  await scenario('proxy rejeita mutação de origem diferente antes de alcançar a API',async()=>{
   const before=fixture.calls.length;const response=await fetch(base+'/api/backend/auth/logout',{method:'POST',headers:{Origin:'https://origem-invalida.example'}});assert.equal(response.status,403);assert.equal(fixture.calls.length,before);

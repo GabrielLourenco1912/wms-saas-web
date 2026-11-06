@@ -17,10 +17,13 @@ npm run dev
 Abra [http://localhost:3000](http://localhost:3000). O servidor Next.js acessa o backend pelo endereço configurado em `.env.local`:
 
 ```dotenv
+WEB_ORIGIN=http://localhost:3000
 WMS_API_BASE_URL=http://localhost:8080
 ```
 
-O valor é a origem da API, sem `/api` no final. O navegador chama `/api/backend/...` na origem do painel; o proxy Next.js encaminha a solicitação ao Spring. A variável é lida no servidor em execução e não precisa ser exposta como `NEXT_PUBLIC_*`.
+`WMS_API_BASE_URL` é a origem da API, sem `/api` no final. O navegador chama `/api/backend/...` na origem do painel; o proxy Next.js encaminha a solicitação ao Spring. A variável é lida no servidor em execução e não precisa ser exposta como `NEXT_PUBLIC_*`.
+
+`WEB_ORIGIN` é a origem pública do painel usada para validar o `Origin` de POST/PUT. Inclua protocolo e porta pública quando necessário, sem caminho, query ou fragmento. Em produção, use a URL HTTPS acessada pelo navegador. Essa configuração é independente do endereço e da porta internos do Next.js; ausente ou inválida, as mutações retornam 503. Origens de solicitação ausentes ou diferentes retornam 403.
 
 Para entrar, use uma conta ativa provisionada no backend e o código enviado por e-mail. A criação de usuários é administrativa. O funcionamento do envio de e-mail, do banco e das permissões depende da configuração do backend.
 
@@ -108,7 +111,9 @@ docker compose -f docker-compose.yml -f wms-saas-web/compose.api.override.exampl
 
 Imagem padrão: `ghcr.io/gabriellourenco1912/wms-saas-web:latest`. `GHCR_NAMESPACE` e `IMAGE_TAG`, no `.env` da raiz, alteram o destino e a versão. `WEB_PORT` e `WEB_PUBLISHED_PORT` controlam as portas do contêiner e do host. O Dockerfile fica em `../docker/web/Dockerfile`, com contexto de build neste projeto.
 
-O contêiner web precisa receber `WMS_API_BASE_URL=http://backend:8080` em seu ambiente de execução quando o serviço Spring se chama `backend` na rede do Compose. `localhost:8080` dentro do contêiner identifica o próprio contêiner web. Verifique a configuração existente e forneça a variável no serviço `web`, o exemplo [compose.api.override.example.yaml](compose.api.override.example.yaml) faz essa configuração sem alterar o Compose principal. Definir a variável apenas no `.env` da raiz não a injeta automaticamente no contêiner.
+Os manifests da raiz já injetam `WMS_API_BASE_URL=http://backend:<SERVER_PORT>` no serviço `web`. Deixe a variável vazia no `.env` para usar esse endereço interno calculado. `localhost:8080` dentro do contêiner identifica o próprio contêiner web. O [compose.api.override.example.yaml](compose.api.override.example.yaml) é opcional e fixa a porta da API em 8080.
+
+Os manifests também injetam `WEB_ORIGIN`. Configure essa variável com a URL pública do painel no `.env` ou nas variables do environment `production` do CI. O Next.js acessa o Spring pela rede interna Docker; o navegador continua usando `/api/backend` na origem do painel.
 
 Configuração, build e comandos de pull/push estão em [docker/README.md](../docker/README.md). Os dados das telas são consultados e alterados pela API configurada; o backend precisa estar acessível pelo processo Next.js.
 

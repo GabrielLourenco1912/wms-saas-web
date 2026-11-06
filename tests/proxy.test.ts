@@ -6,6 +6,7 @@ import { GET, POST, PUT } from "@/app/api/backend/[...path]/route";
 type Call = { target: URL; options: RequestInit; headers: Headers };
 const originalFetch = globalThis.fetch;
 const originalBaseUrl = process.env.WMS_API_BASE_URL;
+const originalWebOrigin = process.env.WEB_ORIGIN;
 const appOrigin = "https://wms.example.com";
 
 function request(method = "GET", path = "/stock", headers: Record<string, string> = {}, body?: string) {
@@ -38,12 +39,15 @@ function envelope(status = 200, data: unknown = null, message = "OK") {
 describe("backend proxy isolation, cookie transport and failures", { concurrency: false }, () => {
   beforeEach(() => {
     process.env.WMS_API_BASE_URL = "http://private-api.internal:8080";
+    process.env.WEB_ORIGIN = appOrigin;
     globalThis.fetch = async () => { throw new Error("Unexpected upstream request in proxy test"); };
   });
   afterEach(() => {
     globalThis.fetch = originalFetch;
     if (originalBaseUrl === undefined) delete process.env.WMS_API_BASE_URL;
     else process.env.WMS_API_BASE_URL = originalBaseUrl;
+    if (originalWebOrigin === undefined) delete process.env.WEB_ORIGIN;
+    else process.env.WEB_ORIGIN = originalWebOrigin;
   });
 
   test("GET uses the configured backend with literal pagination and forces the WEB token transport", async () => {
@@ -91,6 +95,62 @@ describe("backend proxy isolation, cookie transport and failures", { concurrency
     }
   });
 
+  test("public HTTPS mutations reach the Docker backend despite internal request URLs", async () => {
+    process.env.WMS_API_BASE_URL = "http://backend:8181";
+    const calls = stubFetch(() => envelope());
+    for (const internalOrigin of ["http://0.0.0.0:3000", "https://0.0.0.0:3000"]) {
+      for (const method of ["POST", "PUT"] as const) {
+        const incoming = new NextRequest(`${internalOrigin}/api/backend/products`, {
+          method,
+          headers: { Origin: appOrigin, Host: "wms.example.com", "X-Forwarded-Proto": "https" },
+          body: "{}",
+        });
+        const handle = method === "POST" ? POST : PUT;
+        assert.equal((await handle(incoming, context(["products"]))).status, 200);
+      }
+    }
+    assert.equal(calls.length, 4);
+    for (const call of calls) assert.equal(call.target.href, "http://backend:8181/api/products");
+  });
+
+  test("configured public origins support explicit ports and local development", async () => {
+    const calls = stubFetch(() => envelope());
+    for (const configured of ["https://wms.example.com:443/", "https://wms.example.com:8443", "http://localhost:13000"]) {
+      process.env.WEB_ORIGIN = configured;
+      const incoming = new NextRequest("http://web:3000/api/backend/auth/refresh", {
+        method: "POST", headers: { Origin: new URL(configured).origin, Host: "web:3000" },
+      });
+      assert.equal((await POST(incoming, context(["auth", "refresh"]))).status, 200);
+    }
+    assert.equal(calls.length, 3);
+  });
+
+  test("request and forwarded hosts cannot authorize a foreign origin", async () => {
+    const calls = stubFetch(() => envelope());
+    const incoming = new NextRequest("https://attacker.example/api/backend/auth/refresh", {
+      method: "POST",
+      headers: {
+        Origin: "https://attacker.example", Host: "attacker.example",
+        "X-Forwarded-Host": "attacker.example", "X-Forwarded-Proto": "https",
+      },
+    });
+    assert.equal((await POST(incoming, context(["auth", "refresh"]))).status, 403);
+    assert.equal(calls.length, 0);
+  });
+
+  test("missing or invalid public origin configuration blocks mutations before contacting the API", async () => {
+    const calls = stubFetch(() => envelope());
+    for (const configured of [undefined, "", "not-a-url", "null", "file:///etc/passwd", "ftp://wms.example.com",
+      "https://user:password@wms.example.com", `${appOrigin}/path`, `${appOrigin}?query=1`, `${appOrigin}#fragment`]) {
+      if (configured === undefined) delete process.env.WEB_ORIGIN;
+      else process.env.WEB_ORIGIN = configured;
+      const response = await POST(request("POST", "/auth/refresh"), context(["auth", "refresh"]));
+      assert.equal(response.status, 503, `WEB_ORIGIN=${configured}`);
+      assert.equal((await response.json()).message, "A origem pública do painel não está configurada corretamente.");
+    }
+    assert.equal(calls.length, 0);
+  });
+
   test("authentication forwards only the refresh cookie and ignores unrelated browser cookies", async () => {
     const calls = stubFetch(() => envelope());
     await POST(request("POST", "/auth/refresh", {
@@ -119,7 +179,7 @@ describe("backend proxy isolation, cookie transport and failures", { concurrency
 
   test("mutations from a forged, missing or malformed origin are rejected before contacting the API", async () => {
     const calls = stubFetch(() => envelope());
-    for (const origin of ["https://attacker.example", "http://wms.example.com", "https://wms.example.com:444", "not-a-url", ""]) {
+    for (const origin of ["https://attacker.example", "https://wms.example.com.attacker.example", "http://wms.example.com", "https://wms.example.com:444", "not-a-url", "null", ""]) {
       const response = await POST(request("POST", "/auth/refresh", { Origin: origin }), context(["auth", "refresh"]));
       assert.equal(response.status, 403);
     }
