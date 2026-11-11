@@ -47,6 +47,17 @@ Após atualizar o guia de integração da API, `npm run docs:sync` continua send
 - O símbolo tem proteção mínima de 16 unidades no mestre 128 × 128. Usar o recurso maskable em recortes e os recursos próprios de plataforma nos launchers.
 - Preservar foco visível, escala de texto e movimento reduzido. Os exemplos de tipografia e recorte não enviam dados à API.
 
+## Experiência em telas menores
+
+O painel mantém os tokens, o símbolo e as fontes da marca. Os ajustes compartilhados de responsividade ficam em `src/app/responsive.css`, carregado após o sistema de marca, sem alterar os tokens gerados.
+
+- Até 860 px, o cabeçalho permanece acessível durante a rolagem. Os atalhos inferiores respeitam as permissões da conta, e o menu organiza os módulos por área. O menu usa um diálogo nativo, contém o foco, bloqueia a rolagem de fundo e fecha por Escape, pelo botão, por toque fora ou ao retornar ao desktop.
+- Até 640 px, as consultas começam em lista de cartões com todas as colunas e ações. A opção **Tabela** permite comparar colunas com rolagem dentro da consulta. As duas apresentações usam os mesmos registros e preservam a semântica da tabela. Ao paginar, a tela retorna ao início dos resultados.
+- Os filtros de cadastros, estoque, tarefas e livro razão podem ser recolhidos no celular; o contador indica filtros ativos. No desktop, os campos permanecem visíveis. O seletor obrigatório de produto das embalagens continua exposto.
+- Os formulários abrem junto à borda inferior no celular, com cabeçalho e ações de gravação acessíveis durante a rolagem. Campos usam texto de pelo menos 16 px, e os controles principais têm alvos de toque de pelo menos 44 px. A estrutura considera as áreas seguras do dispositivo.
+
+Os cenários de navegador cobrem navegação e foco, permissões, alternância entre lista e tabela, paginação, filtros e formulários, além de verificar todos os módulos em 320, 390, 768 e 1280 px.
+
 ## Verificação
 
 As verificações do projeto incluem lint, TypeScript, suíte de contratos, build e cenários de navegador. Os cenários públicos conferem fontes locais, paleta copiável, tipografia, ícones, downloads, autoria e larguras de 320/390 px com API indisponível. Os cenários do painel conferem os fluxos autenticados após a mudança de identidade.

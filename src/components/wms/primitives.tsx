@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { formatDate, formatDecimal } from '@/lib/api/types';
 
 export function Panel({title,description,children,actions}:{title:string;description?:string;children:ReactNode;actions?:ReactNode}) {
-  return <section className="panel"><header className="panel-header"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{actions}</header>{children}</section>;
+  return <section className="panel"><header className="panel-header"><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{actions&&<div className="panel-header-actions">{actions}</div>}</header>{children}</section>;
 }
 export function Notice({children,tone='info'}:{children:ReactNode;tone?:'error'|'success'|'info'}) {
   return <div className={`notice notice-${tone}`} role={tone === 'error' ? 'alert' : 'status'}>{children}</div>;

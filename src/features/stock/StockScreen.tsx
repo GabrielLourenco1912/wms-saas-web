@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ApiLookup } from "@/components/wms/ApiLookup";
 import { EntityForm, type FieldSpec, type FormValues } from "@/components/wms/EntityForm";
 import { ResourceTable } from "@/components/wms/ResourceTable";
+import { FilterDisclosure } from "@/components/wms/FilterDisclosure";
 import { DetailGrid, Modal, Notice, Panel, StatusPill } from "@/components/wms/primitives";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { api } from "@/lib/api/client";
@@ -67,14 +68,14 @@ export function StockScreen() {
   if (!can("STOCK_VIEW")) return <Notice>Seu perfil não tem acesso à consulta de estoque.</Notice>;
   return <div className="screen-stack">
     <Panel title="Estoque e rastreabilidade" description="Consulte o saldo físico, as reservas e a disponibilidade calculada pelo servidor.">
-      <div className="form-grid">
+      <FilterDisclosure activeCount={Object.values(tab === "stock" ? filters : blockFilters).filter(value => value != null && value !== '').length}><div className="form-grid">
         <ApiLookup resource="warehouses" label="Armazém" value={warehouse} onChange={changeWarehouse} />
         <ApiLookup resource="products" label="Produto" value={product} onChange={setProduct} />
         <ApiLookup resource="positions" label="Posição" value={position} onChange={setPosition} filters={warehouseFilter} />
         {tab === "stock" && <ApiLookup resource="lpns" label="LPN" value={lpn} onChange={setLpn} filters={warehouseFilter} />}
         <label className="field"><span>Lote exato</span><input value={lot} onChange={(event) => setLot(event.target.value)} maxLength={100} placeholder="Filtrar pelo lote" /></label>
         {tab === "stock" ? <label className="checkbox-field"><input type="checkbox" checked={blockedOnly} onChange={(event) => setBlockedOnly(event.target.checked)} />Somente saldos bloqueados</label> : <label className="field"><span>Bloqueios</span><select value={active} onChange={(event) => setActive(event.target.value)}><option value="true">Ativos</option><option value="false">Liberados</option><option value="">Todos</option></select></label>}
-      </div>
+      </div></FilterDisclosure>
       <div className="action-row">
         <button type="button" className={tab === "stock" ? "primary-button" : "secondary-button"} aria-pressed={tab === "stock"} onClick={() => setTab("stock")}>Saldos</button>
         <button type="button" className={tab === "blocks" ? "primary-button" : "secondary-button"} aria-pressed={tab === "blocks"} onClick={() => setTab("blocks")}>Bloqueios</button>

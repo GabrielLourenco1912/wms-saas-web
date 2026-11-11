@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ApiLookup } from "@/components/wms/ApiLookup";
 import { ResourceTable } from "@/components/wms/ResourceTable";
+import { FilterDisclosure } from "@/components/wms/FilterDisclosure";
 import { DetailGrid, Modal, Notice, Panel, StatusPill } from "@/components/wms/primitives";
 import { useAuth } from "@/features/auth/AuthProvider";
 import type { LookupOption } from "@/lib/api/types";
@@ -32,12 +33,12 @@ export function TasksScreen() {
   return <div className="screen-stack">
     {success && <Notice tone="success">{success}</Notice>}
     <Panel title="Acompanhamento de tarefas" description="Consulte o responsável, as quantidades e o histórico. A execução física é realizada no aplicativo mobile.">
-      <div className="toolbar">
+      <FilterDisclosure activeCount={[warehouse, type, mine || assignee].filter(Boolean).length}><div className="toolbar">
         {can("WAREHOUSE_VIEW") && <ApiLookup resource="warehouses" label="Armazém" value={warehouse} onChange={setWarehouse} />}
         <label className="field">Tipo de tarefa<select value={type} onChange={(event) => setType(event.target.value)}><option value="">Todos os tipos</option><option value="PUTAWAY">Armazenagem (putaway)</option><option value="PICKING">Separação (picking)</option><option value="TRANSFERENCIA">Transferência</option></select></label>
         {can("USER_VIEW") && <ApiLookup resource="users" label="Responsável" value={assignee} disabled={mine} onChange={setAssignee} />}
         <label className="checkbox-field"><input type="checkbox" checked={mine} onChange={(event) => { setMine(event.target.checked); setAssignee(null); }} />Somente minhas tarefas</label>
-      </div>
+      </div></FilterDisclosure>
     </Panel>
     <ResourceTable<WarehouseTask> title="Tarefas operacionais" endpoint="/tasks" permission="TASK_VIEW" statuses={taskStatuses} filters={{ ...(warehouse ? { warehouseId: warehouse.id } : {}), ...(type ? { type } : {}), ...(mine && user ? { assignedUserId: user.id } : assignee ? { assignedUserId: assignee.id } : {}) }} reloadKey={reloadKey} searchPlaceholder="Pesquisar por tarefa, tipo, situação ou motivo" columns={[
       { key: "id", label: "Tarefa" }, { key: "type", label: "Tipo" }, { key: "status", label: "Situação", render: (row) => <StatusPill value={row.status} /> }, { key: "targetQuantity", label: "Alvo", render: (row) => quantityLabel(row.targetQuantity) }, { key: "actualQuantity", label: "Realizada", render: (row) => quantityLabel(row.actualQuantity) }, { key: "assignedUserId", label: "Responsável", render: (row) => row.assignedUserId || "Aguardando início pelo operador" }, { key: "createdAt", label: "Criada em", render: (row) => dateLabel(row.createdAt) },

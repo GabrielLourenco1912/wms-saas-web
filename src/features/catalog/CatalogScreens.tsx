@@ -4,6 +4,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { ApiLookup } from "@/components/wms/ApiLookup";
 import { EntityForm, type FormValues } from "@/components/wms/EntityForm";
 import { ResourceTable } from "@/components/wms/ResourceTable";
+import { FilterDisclosure } from "@/components/wms/FilterDisclosure";
 import { DetailGrid, Modal, Notice, StatusPill } from "@/components/wms/primitives";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { api } from "@/lib/api/client";
@@ -136,7 +137,7 @@ function CatalogManager({ kind, filters = {}, warehouseId, product, toolbar }: {
   const fields = catalogFields(kind, { editing: Boolean(editing?.row), warehouseId }).map((field) => ({ ...field, ...(field.type === "lookup" && editing?.row?.[field.name] ? { initialLabel: relationLabels[field.name] ?? String(editing.row[field.name]) } : {}) }));
   return <>
     {notice && <Notice tone="success">{notice}</Notice>}
-    {toolbar}
+    {kind === "product-packages" ? toolbar : <FilterDisclosure activeCount={Object.values(filters).filter(value => value != null && value !== '').length}>{toolbar}</FilterDisclosure>}
     <ResourceTable
       title={definition.title}
       description={definition.description}

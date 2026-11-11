@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { ApiLookup } from "@/components/wms/ApiLookup";
 import { ResourceTable } from "@/components/wms/ResourceTable";
+import { FilterDisclosure } from "@/components/wms/FilterDisclosure";
 import { DetailGrid, Modal, Notice, Panel, StatusPill } from "@/components/wms/primitives";
 import { useAuth } from "@/features/auth/AuthProvider";
 import { formatDate, formatDecimal, text, type Entity, type LookupOption, type Query } from "@/lib/api/types";
@@ -56,7 +57,7 @@ export function AuditScreen() {
   return <div className="screen-stack">
     <Panel title="Livro razão de estoque" description="Acompanhe entradas, saídas, movimentações e ajustes com o histórico preservado.">
       <Notice>Esta consulta apresenta os lançamentos registrados pela API. Datas inicial e final abrangem os dias inteiros no fuso horário do navegador.</Notice>
-      <form aria-label="Filtrar livro razão" onSubmit={applyFilters}><div className="form-grid">
+      <FilterDisclosure activeCount={Object.values(filters).filter(value => value != null && value !== '').length}><form aria-label="Filtrar livro razão" onSubmit={applyFilters}><div className="form-grid">
         <ApiLookup resource="warehouses" label="Armazém" value={warehouse} onChange={(option) => { setWarehouse(option); setLpn(null); setStock(null); }} />
         <ApiLookup resource="products" label="Produto" value={product} onChange={(option) => { setProduct(option); setStock(null); }} />
         <ApiLookup resource="lpns" label="LPN de origem ou destino" value={lpn} onChange={(option) => { setLpn(option); setStock(null); }} filters={{ warehouseId: warehouse?.id }} />
@@ -67,7 +68,7 @@ export function AuditScreen() {
         <label className="field"><span>ID da operação</span><input value={operationId} onChange={(event) => setOperationId(event.target.value)} maxLength={26} /></label>
         <label className="field"><span>Data inicial</span><input type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
         <label className="field"><span>Data final</span><input type="date" value={to} onChange={(event) => setTo(event.target.value)} /></label>
-      </div>{filterError && <Notice tone="error">{filterError}</Notice>}<div className="form-actions"><button type="button" className="secondary-button" onClick={clearFilters}>Limpar filtros</button><button type="submit" className="primary-button">Aplicar filtros</button></div></form>
+      </div>{filterError && <Notice tone="error">{filterError}</Notice>}<div className="form-actions"><button type="button" className="secondary-button" onClick={clearFilters}>Limpar filtros</button><button type="submit" className="primary-button">Aplicar filtros</button></div></form></FilterDisclosure>
     </Panel>
     <ResourceTable title="Lançamentos do livro razão" endpoint="/stock-transactions" permission="AUDIT_VIEW" filters={filters} searchPlaceholder="Pesquisar por lote registrado, motivo ou identificador" emptyMessage="Nenhum lançamento encontrado para esta pesquisa e os filtros aplicados." columns={[
       { key: "id", label: "Lançamento" }, { key: "occurredAt", label: "Ocorrido em", render: (row) => formatDate(row.occurredAt) },

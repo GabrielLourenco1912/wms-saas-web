@@ -65,10 +65,66 @@ try{
   for(const section of ['partners','receipts','orders','tasks','monitoring','transfers','inventories','audit','account']){await page.goto(`${base}/gestao/${section}`);await page.locator('#main-content').waitFor();await page.waitForLoadState('networkidle');assert.equal(await page.locator('#main-content').getByRole('alert').count(),0,section);}
   assert.deepEqual(runtimeErrors,[]);
  });
- await scenario('layout320/390 sem overflow de página e menu acessível',async()=>{
-  await page.setViewportSize({width:390,height:844});await page.goto(base);await page.getByRole('heading',{name:'Visão geral',exact:true}).waitFor();await page.getByRole('button',{name:'Abrir menu'}).click();await page.getByRole('link',{name:'Produtos Catálogo e embalagens'}).click();await page.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();
-  for(const width of [390,320]){await page.setViewportSize({width,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),`overflow em ${width}px`);}await page.screenshot({path:path.join(out,'products-mobile.png'),fullPage:true});
+ const mobileContext=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),mobilePage=await mobileContext.newPage();
+ mobilePage.on('pageerror',error=>runtimeErrors.push(error.message));
+ await scenario('acesso e recuperação de senha cabem em 320/390 com campos legíveis',async()=>{
+  for(const width of [320,390]){
+   await mobilePage.setViewportSize({width,height:844});
+   for(const route of ['/auth/login','/auth/forgot-password']){
+    await mobilePage.goto(base+route);await mobilePage.getByRole('heading',{name:route.endsWith('/login')?'Entrar no WMS':'Recuperar senha',exact:true}).waitFor();assert(await mobilePage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}: ${route}`);assert(Number.parseFloat(await mobilePage.locator('input[type="email"]').evaluate(element=>getComputedStyle(element).fontSize))>=16);
+   }
+  }
  });
+ await scenario('menu mobile contém o foco, fecha por Escape e toque fora, e devolve o foco',async()=>{
+  await login(mobilePage);
+  await mobilePage.waitForFunction(()=>[...document.querySelectorAll('.metric-card strong')].every(element=>element.textContent!=='…'));
+  await mobilePage.screenshot({path:path.join(out,'dashboard-mobile.png'),fullPage:true});
+  const opener=mobilePage.getByRole('button',{name:'Abrir menu',exact:true});await opener.click();const drawer=mobilePage.getByRole('dialog',{name:'Navegação do painel'});await drawer.waitFor();
+  assert.equal(await mobilePage.evaluate(()=>getComputedStyle(document.body).overflow),'hidden');
+  for(let i=0;i<22;i++){await mobilePage.keyboard.press('Tab');assert(await drawer.evaluate(element=>element.contains(document.activeElement)),'O foco deve permanecer no menu.');}
+  for(let i=0;i<22;i++){await mobilePage.keyboard.press('Shift+Tab');assert(await drawer.evaluate(element=>element.contains(document.activeElement)),'O foco reverso deve permanecer no menu.');}
+  await mobilePage.keyboard.press('Escape');await drawer.waitFor({state:'hidden'});assert(await opener.evaluate(element=>element===document.activeElement));
+  await mobilePage.getByRole('button',{name:'Todos os módulos',exact:true}).click();await mobilePage.screenshot({path:path.join(out,'menu-mobile.png'),animations:'disabled'});
+  await mobilePage.mouse.click(386,420);await drawer.waitFor({state:'hidden'});assert.notEqual(await mobilePage.evaluate(()=>getComputedStyle(document.body).overflow),'hidden');
+ });
+ await scenario('atalhos e menu mobile navegam e liberam a página ao mudar para desktop',async()=>{
+  await mobilePage.getByRole('button',{name:'Abrir menu',exact:true}).click();await mobilePage.getByRole('dialog').getByRole('link',{name:'Produtos Catálogo e embalagens'}).click();await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();assert.equal(await mobilePage.locator('dialog[open]').count(),0);
+  await mobilePage.getByRole('navigation',{name:'Acesso rápido'}).getByRole('link',{name:'Estoque',exact:true}).click();await mobilePage.getByRole('heading',{name:'Estoque',exact:true}).waitFor();assert.equal(await mobilePage.getByRole('navigation',{name:'Acesso rápido'}).getByRole('link',{name:'Estoque',exact:true}).getAttribute('aria-current'),'page');
+  await mobilePage.getByRole('button',{name:'Todos os módulos',exact:true}).click();await mobilePage.setViewportSize({width:1024,height:844});await mobilePage.getByRole('dialog').waitFor({state:'hidden'});assert.notEqual(await mobilePage.evaluate(()=>getComputedStyle(document.body).overflow),'hidden');
+  await mobilePage.setViewportSize({width:390,height:844});await mobilePage.goto(base+'/gestao/products');await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();
+ });
+ await scenario('lista mobile conserva dados e ações, permite comparar em tabela e pagina para o início dos resultados',async()=>{
+  const region=mobilePage.getByRole('region',{name:'Tabela Produtos',exact:true});assert(await region.evaluate(element=>element.scrollWidth<=element.clientWidth));
+  assert(await mobilePage.locator('.data-table tbody tr').first().getByText('Ativo',{exact:true}).isVisible());
+  const view=mobilePage.getByRole('group',{name:'Visualização dos registros'});await view.getByRole('button',{name:'Tabela',exact:true}).click();assert(await region.evaluate(element=>element.scrollWidth>element.clientWidth));assert(await mobilePage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await view.getByRole('button',{name:'Lista',exact:true}).click();assert(await region.evaluate(element=>element.scrollWidth<=element.clientWidth));
+  await mobilePage.getByRole('button',{name:'Próxima',exact:true}).click();await mobilePage.getByRole('cell',{name:'SKU-021',exact:true}).waitFor();const searchBounds=await mobilePage.getByRole('searchbox',{name:'Pesquisar SKU, nome ou código de barras'}).boundingBox();assert(searchBounds.y>=0&&searchBounds.y<180,'A próxima página deve retornar aos resultados, sem exigir rolagem de volta.');
+  await mobilePage.getByRole('button',{name:'Anterior',exact:true}).click();await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();
+ });
+ await scenario('filtros mobile podem ser recolhidos sem perder a seleção e ficam visíveis no desktop',async()=>{
+  await mobilePage.goto(base+'/gestao/products');await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();const filter=mobilePage.getByRole('button',{name:/^Filtros/});const status=mobilePage.getByLabel('Situação do cadastro');assert.equal(await status.isVisible(),false);
+  await filter.click();await status.selectOption('true');await mobilePage.getByRole('button',{name:/Filtrar por categoria ativa.*Selecionar/}).click();await Promise.all([mobilePage.waitForResponse(response=>{const url=new URL(response.url());return url.pathname==='/api/backend/products'&&url.searchParams.get('active')==='true'&&url.searchParams.has('categoryId');}),mobilePage.getByRole('button',{name:'Categoria 1',exact:true}).click()]);await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();
+  assert((await filter.innerText()).includes('2'));await filter.click();assert.equal(await status.isVisible(),false);assert(fixture.calls.some(call=>call.path==='/api/products'&&call.query.active==='true'&&call.query.categoryId));
+  await mobilePage.setViewportSize({width:1280,height:844});assert(await status.isVisible());assert.equal(await status.inputValue(),'true');await mobilePage.setViewportSize({width:390,height:844});assert.equal(await status.isVisible(),false);
+ });
+ await scenario('formulário e seletor cabem em 320/390, com ações e fechamento ao alcance',async()=>{
+  for(const width of [320,390]){
+   await mobilePage.setViewportSize({width,height:844});await mobilePage.getByRole('button',{name:'Adicionar produto',exact:true}).click();const dialog=mobilePage.getByRole('dialog');const bounds=await dialog.boundingBox();assert.equal(Math.round(bounds.x),0);assert(Math.round(bounds.width)<=width);assert(Math.round(bounds.y+bounds.height)<=844);
+   const save=await dialog.getByRole('button',{name:'Salvar cadastro',exact:true}).boundingBox();assert(save.y>=0&&save.y+save.height<=844);assert(Number.parseFloat(await dialog.getByLabel('Nome do produto',{exact:false}).evaluate(element=>getComputedStyle(element).fontSize))>=16);
+   await dialog.getByRole('button',{name:/Categoria.*Selecionar/}).click();await dialog.getByRole('button',{name:'Categoria 1',exact:true}).waitFor();const options=await dialog.locator('.lookup-options').boundingBox();assert(options.x>=0&&options.x+options.width<=width);await dialog.getByRole('searchbox',{name:'Pesquisar Categoria'}).fill('Categoria 12');await dialog.getByRole('button',{name:'Categoria 12',exact:true}).click();
+   await dialog.getByLabel('Nome do produto',{exact:false}).fill('Produto no celular');if(width===390)await mobilePage.screenshot({path:path.join(out,'product-form-mobile.png')});await dialog.getByRole('button',{name:'Cancelar',exact:true}).click();await dialog.waitFor({state:'detached'});
+  }
+ });
+ await scenario('todos os módulos cabem em celulares, tablet e desktop sem overflow de página',async()=>{
+  for(const width of [320,390,768,1280]){
+   await mobilePage.setViewportSize({width,height:844});
+   for(const section of ['dashboard','warehouse','products','partners','receipts','orders','tasks','monitoring','stock','transfers','inventories','audit','users','account']){
+    await mobilePage.goto(section==='dashboard'?base:`${base}/gestao/${section}`);await mobilePage.locator('#main-content').waitFor();await mobilePage.waitForLoadState('networkidle');assert(await mobilePage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`overflow em ${width}px: ${section}`);
+   }
+  }
+  await mobilePage.setViewportSize({width:390,height:844});await mobilePage.goto(base+'/gestao/products');await mobilePage.getByRole('searchbox',{name:'Pesquisar SKU, nome ou código de barras'}).fill('Produto 01');await mobilePage.getByRole('cell',{name:'SKU-001',exact:true}).waitFor();await mobilePage.getByText('1 registro',{exact:true}).waitFor();await mobilePage.screenshot({path:path.join(out,'products-mobile.png'),fullPage:true});assert.deepEqual(runtimeErrors,[]);
+ });
+ await mobileContext.close();
  await scenario('permissões reais escondem módulos e protegem navegação direta',async()=>{
   const readerContext=await browser.newContext({viewport:{width:1280,height:900}}),readerPage=await readerContext.newPage();await login(readerPage,'leitura@example.test');assert.equal(await readerPage.getByRole('link',{name:'Usuários Contas e perfis de acesso'}).count(),0);const before=fixture.calls.filter(call=>call.path==='/api/users').length;await readerPage.goto(base+'/gestao/users');await readerPage.getByText('Seu perfil não permite acessar este módulo.',{exact:false}).waitFor();assert.equal(fixture.calls.filter(call=>call.path==='/api/users').length,before);await readerContext.close();
  });
